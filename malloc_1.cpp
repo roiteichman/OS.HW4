@@ -17,9 +17,11 @@ void* smalloc(size_t size){
 }
 
 int main(){
-    void* a = smalloc(1);
-    void* b = smalloc(1);
+    void* a = smalloc(0);
+    void* b = smalloc(100000001);
+    void* c = smalloc(-1);
     printf("a: %u\n", a);
     printf("b: %u\n", b);
+    printf("c: %u\n", c);
     return 0;
 }
