@@ -15,3 +15,11 @@ void* smalloc(size_t size){
     }
     return NULL;
 }
+
+int main(){
+    void* a = smalloc(1);
+    void* b = smalloc(1);
+    printf("a: %ld\n", a);
+    printf("b: %ld\n", b);
+    return 0;
+}
