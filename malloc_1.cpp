@@ -1,7 +1,7 @@
 //
 // Created by teich on 26/06/2023.
 //
-
+#include <iostream>
 #define MAXSIZE 100000000
 
 void* smalloc(size_t size){
