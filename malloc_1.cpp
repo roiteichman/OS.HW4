@@ -19,7 +19,7 @@ void* smalloc(size_t size){
 int main(){
     void* a = smalloc(1);
     void* b = smalloc(1);
-    printf("a: %d\n", (unsigned int*)a);
-    printf("b: %d\n", (unsigned int*)b);
+    printf("a: %u\n", a);
+    printf("b: %u\n", b);
     return 0;
 }
