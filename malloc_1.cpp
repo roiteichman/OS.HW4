@@ -17,6 +17,8 @@ void* smalloc(size_t size){
     return NULL;
 }
 
+//TODO: negative num not making warning while compilation
+
 int main(){
     void* a = smalloc(0);
     void* b = smalloc(100000001);
