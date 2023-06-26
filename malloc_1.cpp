@@ -21,8 +21,8 @@ int main(){
     void* a = smalloc(0);
     void* b = smalloc(100000001);
     void* c = smalloc(-1);
-    printf("a: %u\n", a);
-    printf("b: %u\n", b);
-    printf("c: %u\n", c);
+    printf("a: %d\n", (unsigned int*)a);
+    printf("b: %d\n", (unsigned int*)b);
+    printf("c: %d\n", (unsigned int*)c);
     return 0;
 }
