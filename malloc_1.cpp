@@ -2,6 +2,7 @@
 // Created by teich on 26/06/2023.
 //
 #include <iostream>
+#include <unistd.h>
 #define MAXSIZE 100000000
 
 void* smalloc(size_t size){
