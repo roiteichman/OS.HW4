@@ -4,6 +4,7 @@
 #define MAXSIZE 100000000
 #include <cstring>
 #include <unistd.h>
+#include <iostream>
 
 
 //TODO: address structure for meta_data - theirs or like ATAM?
@@ -274,9 +275,9 @@ int main(){
     void* b = smalloc(100000001);
     void* c = smalloc(100000000);
     void* d = smalloc(99999999);
-    printf("a: %u\n", (unsigned int)a);
-    printf("b: %u\n", (unsigned int)b);
-    printf("c: %u\n", (unsigned int)c);
-    printf("d: %u\n", (unsigned int)d);
+    printf("a: %p\n", a);
+    printf("b: %p\n", b);
+    printf("c: %p\n", c);
+    printf("d: %p\n", d);
     return 0;
 }
