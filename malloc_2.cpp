@@ -21,13 +21,62 @@ MallocMetadata* sorted_list = NULL;
 int counter_total_blocks = 0;
 
 
+void add_to_list(void* new_block){
+    MallocMetadata* Malloc_new_block = (MallocMetadata*)new_block;
 
-void* smalloc(size_t size){
-    // check size
-    if (size == 0 || size > MAXSIZE){
-        return NULL;
+    // if first block - update the global list pointer + counter
+    if(sorted_list==NULL){
+        sorted_list = Malloc_new_block;
     }
 
+    // create temp
+    MallocMetadata* head = sorted_list;
+    MallocMetadata* temp = head;
+
+    // run the allocated blocks and find the right spot to enter the Malloc_new_block
+    while (temp!=NULL) {
+        // if need to be before temp
+        if (&Malloc_new_block < &temp) {
+            // save the temp_prev
+            MallocMetadata *temp_prev = temp->prev;
+
+            // update the prev to point on the Malloc_new_block
+            temp_prev->next = Malloc_new_block;
+
+            // update the Malloc_new_block to point on the curr from back and on the prev curr.prev from back
+            Malloc_new_block->prev = temp_prev;
+            Malloc_new_block->next = temp;
+
+            // update the curr.prev to point on Malloc_new_block
+            temp->prev = Malloc_new_block;
+
+            // if enter before the first one - update the global list pointer
+            if (head==temp){
+                sorted_list = Malloc_new_block;
+            }
+
+            // found the right spot so can break the loop
+            break;
+        }
+
+            // if address of Malloc_new_block is the largest, enter at the end
+        else if (temp->next==NULL && (&Malloc_new_block > &temp)){
+            temp->next = Malloc_new_block;
+            Malloc_new_block->prev - temp;
+            break;
+        }
+
+        else {
+            // advance temp
+            temp = temp->next;
+        }
+    }
+
+    // increase the amount of blocks
+    counter_total_blocks++;
+}
+
+void* find_free_block(size_t size){
     // move on the "free_list"
     MallocMetadata* temp = sorted_list;
     // search for fit block
@@ -40,15 +89,29 @@ void* smalloc(size_t size){
             // return pointer to start
             return temp;
         }
-        // else size is not enough
+            // else size is not enough
         else{
             temp = temp->next;
         }
     }
+    return NULL;
+}
+
+
+void* smalloc(size_t size){
+    // check size
+    if (size == 0 || size > MAXSIZE){
+        return NULL;
+    }
+
+    void* new_block = find_free_block(size);
+    if (new_block!=NULL){
+        return new_block;
+    }
 
     // else if  - sbrk
     // new_block holds the address of the metadata
-    MallocMetadata* new_block = sbrk(size + sizeof(MallocMetadata));
+    new_block = sbrk(size + sizeof(MallocMetadata));
 
     //if sbrk succeeded
     if(new_block != (void*)(-1)){
@@ -61,60 +124,10 @@ void* smalloc(size_t size){
         metadata.next=NULL;
 
         // put the metadata struct in the place we allocate - convert the address from void* to metadata* and saved in new_block the metadata
-        *new_block = metadata;
+        *(MallocMetadata*)new_block = metadata;
 
         // add to the allocations list
-
-        // if first block - update the global list pointer + counter
-        if(sorted_list==NULL){
-            sorted_list = new_block;
-        }
-
-        // create temp
-        MallocMetadata* head = sorted_list;
-        MallocMetadata* temp = head;
-
-        // run the allocated blocks and find the right spot to enter the new_block
-        while (temp!=NULL) {
-            // if need to be before temp
-            if (&new_block < &temp) {
-                // save the temp_prev
-                MallocMetadata *temp_prev = temp->prev;
-
-                // update the prev to point on the new_block
-                temp_prev->next = new_block;
-
-                // update the new_block to point on the curr from back and on the prev curr.prev from back
-                new_block->prev = temp_prev;
-                new_block->next = temp;
-
-                // update the curr.prev to point on new_block
-                temp->prev = new_block;
-
-                // if enter before the first one - update the global list pointer
-                if (head==temp){
-                    sorted_list = new_block;
-                }
-
-                // found the right spot so can break the loop
-                break;
-            }
-
-            // if address of new_block is the largest, enter at the end
-            else if (temp->next==NULL && (&new_block > &temp)){
-                temp->next = new_block;
-                new_block->prev - temp;
-                break;
-            }
-
-            else {
-                // advance temp
-                temp = temp->next;
-            }
-        }
-
-        // increase the amount of blocks
-        counter_total_blocks++;
+        add_to_list(new_block);
 
         // return pointer to start of block
         return ((void*)((MallocMetadata*)new_block + sizeof(MallocMetadata)));
