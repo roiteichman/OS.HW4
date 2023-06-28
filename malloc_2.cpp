@@ -38,7 +38,7 @@ void add_to_list(void* new_block){
     // run the allocated blocks and find the right spot to enter the Malloc_new_block
     while (temp!=NULL) {
         // if need to be before temp
-        if (&Malloc_new_block < &temp) {
+        if (Malloc_new_block < temp) {
             // save the temp_prev
             MallocMetadata *temp_prev = temp->prev;
 
@@ -68,7 +68,7 @@ void add_to_list(void* new_block){
         }
 
             // if address of Malloc_new_block is the largest, enter at the end
-        else if (temp->next==NULL && (&Malloc_new_block > &temp)){
+        else if (temp->next==NULL){
             temp->next = Malloc_new_block;
             Malloc_new_block->prev - temp;
             break;
@@ -279,12 +279,6 @@ size_t _size_meta_data(){
 
 
 int main(){
-    printf("\nbefore create a:\n");
-    printf("\nbefore delete a:\n");
-    printf("num_of_blocks = %lu\n", (unsigned long)_num_allocated_blocks());
-    printf("num_of_bytes = %lu\n", (unsigned long)_num_allocated_bytes());
-    printf("num_meta_data_bytes = %lu\n", (unsigned long)_num_meta_data_bytes());
-    printf("size_meta_data = %lu\n", (unsigned long)_size_meta_data());
 
     void* a = smalloc(32);
     printf("a: %p\n", a);
