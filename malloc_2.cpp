@@ -28,6 +28,7 @@ void add_to_list(void* new_block){
     // if first block - update the global list pointer + counter
     if(sorted_list==NULL){
         sorted_list = Malloc_new_block;
+        counter_total_blocks++;
         return;
     }
 
