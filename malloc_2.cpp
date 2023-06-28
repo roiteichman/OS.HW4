@@ -288,7 +288,7 @@ int main(){
     *(int*)a = 1;
     printf("after change *(int*)a = %d\n", *(int*)a);
 
-    void* b = scalloc(2,32);
+    void* b = srealloc(a,32);
     //void* b = smalloc(64);
     printf("b: %p\n", b);
     printf("b.size : %lu\n", ((MallocMetadata*)b-sizeof(MallocMetadata))->size);
