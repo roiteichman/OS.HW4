@@ -279,6 +279,13 @@ size_t _size_meta_data(){
 
 
 int main(){
+    printf("\nbefore create a:\n");
+    printf("\nbefore delete a:\n");
+    printf("num_of_blocks = %lu\n", (unsigned long)_num_allocated_blocks());
+    printf("num_of_bytes = %lu\n", (unsigned long)_num_allocated_bytes());
+    printf("num_meta_data_bytes = %lu\n", (unsigned long)_num_meta_data_bytes());
+    printf("size_meta_data = %lu\n", (unsigned long)_size_meta_data());
+
     void* a = smalloc(32);
     printf("a: %p\n", a);
     printf("*(int*)a = %d\n", *(int*)a);
