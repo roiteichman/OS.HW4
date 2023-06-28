@@ -273,11 +273,15 @@ size_t _size_meta_data(){
 
 
 int main(){
-    void* a = smalloc(64);
+    void* a = smalloc(32);
+    printf("a: %p\n", a);
+    printf("*(int*)a= %d\n", *(int*)a);
+    *(int*)a = 1;
+    printf("after change *(int*)a= %d\n", *(int*)a);
+
     //void* b = smalloc(100000001);
     //void* c = smalloc(100000000);
     //void* d = smalloc(99999999);
-    printf("a: %p\n", a);
     //printf("b: %p\n", b);
     //printf("c: %p\n", c);
     //printf("d: %p\n", d);
