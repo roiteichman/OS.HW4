@@ -17,12 +17,9 @@ struct MallocMetadata {
 
 //TODO: global sorted LIST (by address) - our
 MallocMetadata* sorted_list = NULL;
-//TODO: global counter_bytes
-int counter_bytes = 0;
 //TODO: global counter_total_blocks
 int counter_total_blocks = 0;
-//TODO: global counter_total_bytes
-int counter_total_bytes = 0;
+
 
 
 void* smalloc(size_t size){
@@ -194,25 +191,79 @@ void* srealloc(void* oldp, size_t size){
 }
 
 size_t _num_free_blocks(){
-    // return list.size();
+    // init counter
+    size_t counter = 0;
+    // move on the list
+    MallocMetadata* curr = sorted_list;
+    // for every block isfree==true make counter++
+    while (curr != NULL){
+        if (curr->is_free==true){
+            counter++;
+        }
+        curr = curr->next;
+    }
+    // return counter
+    return counter;
 }
 
 size_t _num_free_bytes(){
-    // return counter_bytes
+    // like free_block but instead of return the amount of them, return the amount of sizes
+
+    // init total_free_space
+    size_t total_free_space = 0;
+    // move on the list
+    MallocMetadata* curr = sorted_list;
+    // for every block isfree==true make += total_free_space
+    while (curr != NULL){
+        if (curr->is_free==true){
+            total_free_space += curr->size;
+        }
+        curr = curr->next;
+    }
+    // return total_free_space
+    return total_free_space;
 }
 
 size_t _num_allocated_blocks(){
     //return counter_total_blocks
+    return counter_total_blocks;
 }
 
 size_t _num_allocated_bytes(){
-    //return counter_total_bytes
+    // like free_byte without the condition of is_free == true
+
+    // init total_space
+    size_t total_space = 0;
+    // move on the list
+    MallocMetadata* curr = sorted_list;
+    // for every block isfree==true make += total_space
+    while (curr != NULL){
+        total_space += curr->size;
+        curr = curr->next;
+    }
+    // return total_space
+    return total_space;
 }
 
 size_t _num_meta_data_bytes(){
     //return counter_total_blocks*sizeof(meta_data)
+    return counter_total_blocks*sizeof(MallocMetadata);
 }
 
 size_t _size_meta_data(){
     //return sizeof(meta_data)
+    return sizeof(MallocMetadata);
+}
+
+
+int main(){
+    void* a = smalloc(0);
+    void* b = smalloc(100000001);
+    void* c = smalloc(100000000);
+    void* d = smalloc(99999999);
+    printf("a: %u\n", (unsigned int)a);
+    printf("b: %u\n", (unsigned int)b);
+    printf("c: %u\n", (unsigned int)c);
+    printf("d: %u\n", (unsigned int)d);
+    return 0;
 }
