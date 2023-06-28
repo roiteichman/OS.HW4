@@ -282,16 +282,24 @@ int main(){
     void* a = smalloc(32);
     printf("a: %p\n", a);
     printf("*(int*)a = %d\n", *(int*)a);
+    printf("a.size : %lu\n", ((MallocMetadata*)a-sizeof(MallocMetadata))->size);
     *(int*)a = 1;
     printf("after change *(int*)a = %d\n", *(int*)a);
 
     void* b = scalloc(2,32);
     printf("b: %p\n", b);
     printf("b.size : %lu\n", ((MallocMetadata*)b-sizeof(MallocMetadata))->size);
-    printf("*(int*)a = %d\n", *(int*)b);
+    printf("*(int*)b = %d\n", *(int*)b);
+
+    printf("\nbefore delete a:\n");
+    printf("num_of_blocks = %lu\n", (unsigned long)_num_allocated_blocks());
+    printf("num_of_bytes = %lu\n", (unsigned long)_num_allocated_bytes());
+    printf("num_meta_data_bytes = %lu\n", (unsigned long)_num_meta_data_bytes());
+    printf("size_meta_data = %lu\n", (unsigned long)_size_meta_data());
 
     sfree(a);
 
+    printf("\nafter delete a:\n");
     printf("num_of_blocks = %lu\n", (unsigned long)_num_allocated_blocks());
     printf("num_of_bytes = %lu\n", (unsigned long)_num_allocated_bytes());
     printf("num_meta_data_bytes = %lu\n", (unsigned long)_num_meta_data_bytes());
