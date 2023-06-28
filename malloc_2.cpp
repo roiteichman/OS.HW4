@@ -281,7 +281,7 @@ int main(){
 
     void* b = scalloc(2,32);
     printf("b: %p\n", b);
-    printf("b.size : %d\n", ((MallocMetadata*)b-sizeof(MallocMetadata))->size);
+    printf("b.size : %lu\n", ((MallocMetadata*)b-sizeof(MallocMetadata))->size);
     printf("*(int*)a = %d\n", *(int*)b);
 
     sfree(a);
