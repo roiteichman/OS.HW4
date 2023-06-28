@@ -43,7 +43,13 @@ void add_to_list(void* new_block){
             MallocMetadata *temp_prev = temp->prev;
 
             // update the prev to point on the Malloc_new_block
-            temp_prev->next = Malloc_new_block;
+            if (temp_prev != NULL){
+                temp_prev->next = Malloc_new_block;
+            }
+            // if temp_prev == NULL - means temp was the first elem
+            else {
+                sorted_list = Malloc_new_block;
+            }
 
             // update the Malloc_new_block to point on the curr from back and on the prev curr.prev from back
             Malloc_new_block->prev = temp_prev;
