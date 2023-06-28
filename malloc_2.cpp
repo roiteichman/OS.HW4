@@ -28,6 +28,7 @@ void add_to_list(void* new_block){
     // if first block - update the global list pointer + counter
     if(sorted_list==NULL){
         sorted_list = Malloc_new_block;
+        return;
     }
 
     // create temp
@@ -75,6 +76,7 @@ void add_to_list(void* new_block){
 
     // increase the amount of blocks
     counter_total_blocks++;
+    return;
 }
 
 void* find_free_block(size_t size){
