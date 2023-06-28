@@ -294,7 +294,7 @@ int main(){
     printf("*(int*)b = %d\n", *(int*)b);
 
 
-    void* c = srealloc(b,32);
+    void* c = srealloc(b,64);
     printf("c: %p\n", c);
     printf("c.size : %lu\n", ((MallocMetadata*)c-sizeof(MallocMetadata))->size);
     printf("*(int*)c = %d\n", *(int*)c);
