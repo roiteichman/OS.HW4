@@ -275,9 +275,24 @@ size_t _size_meta_data(){
 int main(){
     void* a = smalloc(32);
     printf("a: %p\n", a);
-    printf("*(int*)a= %d\n", *(int*)a);
+    printf("*(int*)a = %d\n", *(int*)a);
     *(int*)a = 1;
-    printf("after change *(int*)a= %d\n", *(int*)a);
+    printf("after change *(int*)a = %d\n", *(int*)a);
+
+    void* b = scalloc(2,32);
+    printf("b: %p\n", b);
+    printf("b.size : %d\n", ((MallocMetadata*)b-sizeof(MallocMetadata))->size);
+    printf("*(int*)a = %d\n", *(int*)b);
+
+    sfree(a);
+
+    printf("num_of_blocks = %lu\n", (unsigned long)_num_allocated_blocks());
+    printf("num_of_bytes = %lu\n", (unsigned long)_num_allocated_bytes());
+    printf("num_meta_data_bytes = %lu\n", (unsigned long)_num_meta_data_bytes());
+    printf("size_meta_data = %lu\n", (unsigned long)_size_meta_data());
+
+
+
 
     //void* b = smalloc(100000001);
     //void* c = smalloc(100000000);
