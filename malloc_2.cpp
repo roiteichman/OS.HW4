@@ -288,17 +288,18 @@ int main(){
     *(int*)a = 1;
     printf("after change *(int*)a = %d\n", *(int*)a);
 
-    void* b = srealloc(a,32);
-    //void* b = smalloc(64);
+    void* b = srealloc(a,16);
     printf("b: %p\n", b);
     printf("b.size : %lu\n", ((MallocMetadata*)b-sizeof(MallocMetadata))->size);
     printf("*(int*)b = %d\n", *(int*)b);
 
-    printf("\nbefore delete a:\n");
-    printf("num_of_blocks = %lu\n", (unsigned long)_num_allocated_blocks());
-    printf("num_of_bytes = %lu\n", (unsigned long)_num_allocated_bytes());
-    printf("num_meta_data_bytes = %lu\n", (unsigned long)_num_meta_data_bytes());
-    printf("size_meta_data = %lu\n", (unsigned long)_size_meta_data());
+
+    void* c = srealloc(b,32);
+    printf("c: %p\n", c);
+    printf("c.size : %lu\n", ((MallocMetadata*)c-sizeof(MallocMetadata))->size);
+    printf("*(int*)c = %d\n", *(int*)c);
+
+
 
     sfree(a);
 
