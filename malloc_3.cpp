@@ -556,7 +556,7 @@ void* srealloc(void* oldp, size_t size){
     // if big block:
     if (wanted_order == -1) {
         return big_block_realloc(old_block, size);
-
+    }
     // else regular block
     size_t src_size = SIZE_OF_ORDER(old_block->order)-sizeof(MallocMetadata);
     // try to merge until the wanted size:
