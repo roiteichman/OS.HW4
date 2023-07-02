@@ -12,6 +12,7 @@
 #include <unistd.h>
 #include <iostream>
 #include <assert.h>
+#include <sys/mman.h>
 
 #define DEBUG_PRINT
 
@@ -403,6 +404,7 @@ void* smalloc(size_t size){
         return nullptr;
     }
     int wanted_order = findMatchOrder(size);
+    MallocMetadata* new_block = nullptr;
     // big size:
     if (wanted_order == -1) {
         new_block = allocate_big_block(size);
@@ -413,7 +415,7 @@ void* smalloc(size_t size){
     }
 
     // regular size:
-    MallocMetadata* new_block = findTheMatchBlock(wanted_order);
+    new_block = findTheMatchBlock(wanted_order);
     // if the memory is full:
     if (new_block == nullptr) {
         return nullptr;
