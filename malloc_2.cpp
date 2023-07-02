@@ -71,7 +71,7 @@ void add_to_list(void* new_block){
             // if address of Malloc_new_block is the largest, enter at the end
         else if (temp->next==NULL){
             temp->next = Malloc_new_block;
-            Malloc_new_block->prev - temp;
+            Malloc_new_block->prev = temp;
             break;
         }
 
