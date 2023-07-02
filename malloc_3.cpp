@@ -400,6 +400,7 @@ int free_big_block(MallocMetadata* block_to_delete){
 ----------------------------------------*/
 
 void* smalloc(size_t size){
+    init();
     // check size
     if (size == 0 || size > SIZE_LIMITATION){
         return nullptr;
@@ -424,6 +425,7 @@ void* smalloc(size_t size){
 
 
 void* scalloc(size_t num, size_t size){
+    init();
     // call smalloc
     void* new_block = smalloc(num * size);
     if (new_block == nullptr){
@@ -441,6 +443,7 @@ void* scalloc(size_t num, size_t size){
 }
 
 void sfree(void* p){
+    init();
     // check if p is null or meta_data flag is free (p-size(meta_data))
     if (p == nullptr){
         return;
@@ -461,6 +464,7 @@ void sfree(void* p){
 
 /*
 void* srealloc(void* oldp, size_t size){
+    init();
     // check size and pointer
     if (size == 0 || size > SIZE_LIMITATION){
         return NULL;
