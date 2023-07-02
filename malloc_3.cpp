@@ -466,7 +466,8 @@ void sfree(void* p){
     }
 }
 
-/*
+//TODO: implement from here
+
 void* srealloc(void* oldp, size_t size){
     init();
     // check size and pointer
@@ -573,7 +574,7 @@ size_t _size_meta_data(){
     //return sizeof(meta_data)
     return sizeof(MallocMetadata);
 }
-*/
+
 
 #ifdef DEBUG_PRINT
 
