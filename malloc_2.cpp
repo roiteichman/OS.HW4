@@ -168,7 +168,7 @@ void sfree(void* p){
         return;
     }
     // else - free means get the right address and update flag
-    MallocMetadata* to_free = (MallocMetadata*)p - sizeof(MallocMetadata);
+    MallocMetadata* to_free = (MallocMetadata*)p - 1;
     to_free->is_free= true;
 }
 
@@ -189,7 +189,7 @@ void* srealloc(void* oldp, size_t size){
     }
 
     // if size < oldp.size() return oldp
-    MallocMetadata* old_block = (MallocMetadata*)oldp-sizeof(MallocMetadata);
+    MallocMetadata* old_block = (MallocMetadata*)oldp-1;
     if (size <= old_block->size){
         return oldp;
     }
@@ -284,19 +284,19 @@ int main(){
     void* a = smalloc(32);
     printf("a: %p\n", a);
     printf("*(int*)a = %d\n", *(int*)a);
-    printf("a.size : %lu\n", ((MallocMetadata*)a-sizeof(MallocMetadata))->size);
+    printf("a.size : %lu\n", ((MallocMetadata*)a-1)->size);
     *(int*)a = 1;
     printf("after change *(int*)a = %d\n", *(int*)a);
 
     void* b = srealloc(a,16);
     printf("b: %p\n", b);
-    printf("b.size : %lu\n", ((MallocMetadata*)b-sizeof(MallocMetadata))->size);
+    printf("b.size : %lu\n", ((MallocMetadata*)b-1)->size);
     printf("*(int*)b = %d\n", *(int*)b);
 
 
     void* c = srealloc(b,64);
     printf("c: %p\n", c);
-    printf("c.size : %lu\n", ((MallocMetadata*)c-sizeof(MallocMetadata))->size);
+    printf("c.size : %lu\n", ((MallocMetadata*)c-1)->size);
     printf("*(int*)c = %d\n", *(int*)c);
 
 
