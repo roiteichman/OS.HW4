@@ -206,6 +206,8 @@ public:
 
     void addToList (MallocMetadata* new_block);
     void remove_block(MallocMetadata* block_to_remove);
+    int get_len() const;
+    size_t allocated_bytes() const;
 };
 
 List::List(): m_list_size(0), m_first(nullptr) {}
@@ -220,6 +222,7 @@ void List::addToList(MallocMetadata* new_block) {
     if (prev_head!= nullptr){
         prev_head->prev = new_block;
     }
+    m_list_size++;
 }
 
 void List::remove_block(MallocMetadata *block_to_remove) {
@@ -244,6 +247,19 @@ void List::remove_block(MallocMetadata *block_to_remove) {
         // continue to the next block
         curr=curr->next;
     }
+    m_list_size--;
+}
+
+int List::get_len() const {
+    return m_list_size;
+}
+
+size_t List::allocated_bytes() const {
+    size_t result;
+    for (MallocMetadata* ptr = m_first; ptr != nullptr; ptr = ptr->next) {
+        result += ptr->order;
+    }
+    return result;
 }
 
 List big_block_list;
@@ -396,11 +412,19 @@ MallocMetadata* findTheMatchBlock(int wanted_order) {
 
 MallocMetadata* allocate_big_block(size_t wanted_size){
     void* result = mmap(NULL, wanted_size+sizeof(MallocMetadata), PROT_READ | PROT_WRITE, MAP_ANONYMOUS, -1, 0);
+    if (result != MAP_FAILED){
+        MallocMetadata tmp(wanted_size);
+        *(MallocMetadata*)result = tmp;
+        big_block_list.addToList((MallocMetadata*)result);
+    }
     return (MallocMetadata*)result;
 }
 
 int free_big_block(MallocMetadata* block_to_delete){
     int result = munmap((void*)block_to_delete, (size_t)((block_to_delete->order)+sizeof(MallocMetadata)));
+    if (result == -1){
+        big_block_list.addToList(block_to_delete);
+    }
     return result;
 }
 
@@ -478,7 +502,9 @@ void sfree(void* p){
     }
     // big block:
     else {
-        free_big_block(to_free);
+        if(free_big_block(to_free)==-1){
+            // munmap failed
+        }
     }
 }
 
@@ -563,47 +589,40 @@ void* srealloc(void* oldp, size_t size){
 }
 
 size_t _num_free_blocks(){
+    // sum len of block_list for every entry
+
     // init counter
     size_t counter = 0;
-    /*
-    // move on the list
-    MallocMetadata* curr = sorted_list;
-    // for every block isfree==true make counter++
-    while (curr != NULL){
-        if (curr->is_free==true){
-            counter++;
-        }
-        curr = curr->next;
+
+    // get the number of small free blocks
+    for (int i = 0; i <= MAX_ORDER; ++i) {
+        counter += block_lists->len();
     }
-     */
+
+    // mind that big blocks are not freed
+
     // return counter
     return counter;
 }
 
 size_t _num_free_bytes(){
 
-    // like free_block but instead of return the amount of them, return the amount of sizes
+    // like free_block but instead of return the len*(sizeof(order)-metadata)
 
     // init total_free_space
     size_t total_free_space = 0;
-    /*
-    // move on the list
-    MallocMetadata* curr = sorted_list;
-    // for every block isfree==true make += total_free_space
-    while (curr != NULL){
-        if (curr->is_free==true){
-            total_free_space += curr->order;
-        }
-        curr = curr->next;
+
+    for (int i = 0; i <= MAX_ORDER; ++i) {
+        total_free_space += (block_lists->len())*(SIZE_OF_ORDER(i)-sizeof(MallocMetadata));
     }
-    // return total_free_space
-     */
+
+    // mind that big blocks are not freed
+
     return total_free_space;
 }
 
 size_t _num_allocated_blocks(){
-    //return counter_total_blocks
-    return counter_total_blocks;
+    return counter_total_blocks_used+_num_free_blocks()+big_block_list.get_len();
     }
 
 size_t _num_allocated_bytes(){
@@ -626,12 +645,10 @@ size_t _num_allocated_bytes(){
 }
 
 size_t _num_meta_data_bytes(){
-    //return counter_total_blocks*sizeof(meta_data)
-    return counter_total_blocks*sizeof(MallocMetadata);
+    return _num_allocated_blocks()*sizeof(MallocMetadata);
 }
 
 size_t _size_meta_data(){
-    //return sizeof(meta_data)
     return sizeof(MallocMetadata);
 }
 
