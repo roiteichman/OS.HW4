@@ -532,7 +532,7 @@ void* srealloc(void* oldp, size_t size){
     else {
 
     }
-
+return result; // TODO: delete this
 
     /*
     MallocMetadata* new_block = nullptr;
@@ -556,7 +556,7 @@ void* srealloc(void* oldp, size_t size){
     return (void*) (new_block+1);
     */
 
-
+/*
     // if oldp == NULL allocate size bytes and return
     if (oldp == NULL){
         result = smalloc(size);
@@ -589,7 +589,7 @@ void* srealloc(void* oldp, size_t size){
             // return
             return result;
         }
-    }
+    }*/
 }
 
 size_t _num_free_blocks(){
