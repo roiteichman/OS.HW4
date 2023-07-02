@@ -538,7 +538,6 @@ void* srealloc(void* oldp, size_t size){
     else {
 
     }
-return result; // TODO: delete this
 
     /*
     MallocMetadata* new_block = nullptr;
