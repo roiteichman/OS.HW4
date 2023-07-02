@@ -453,7 +453,7 @@ void sfree(void* p){
         return;
     }
     // else - free means get the right address and update flag
-    MallocMetadata* to_free = (MallocMetadata*)p - sizeof(MallocMetadata);
+    MallocMetadata* to_free = (MallocMetadata*)p - 1;
     to_free->is_free= true;
 
     // regular block:
