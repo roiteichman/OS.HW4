@@ -470,11 +470,12 @@ void sfree(void* p){
 
 void* srealloc(void* oldp, size_t size){
     init();
+    void* result;
+    /*
     // check size and pointer
     if (size == 0 || size > SIZE_LIMITATION){
         return NULL;
     }
-    void* result;
 
     // if oldp == NULL allocate size bytes and return
     if (oldp == NULL){
@@ -483,11 +484,12 @@ void* srealloc(void* oldp, size_t size){
             return result;
         }
         return NULL;
+
     }
 
     // if size < oldp.size() return oldp
     MallocMetadata* old_block = (MallocMetadata*)oldp-sizeof(MallocMetadata);
-    if (size <= old_block->size){
+    if (size <= old_block->order){
         return oldp;
     }
         // else need to get new allocation
@@ -501,18 +503,21 @@ void* srealloc(void* oldp, size_t size){
             // else - allocation succeeded
         else {
             // copy the content - with std::memmove()
-            std::memmove(result, oldp, old_block->size);
+            std::memmove(result, oldp, old_block->order);
             // sfree oldp
             sfree(oldp);
             // return
             return result;
         }
     }
+     */
+    return result; // TODO: delete this line after that
 }
 
 size_t _num_free_blocks(){
     // init counter
     size_t counter = 0;
+    /*
     // move on the list
     MallocMetadata* curr = sorted_list;
     // for every block isfree==true make counter++
@@ -522,45 +527,52 @@ size_t _num_free_blocks(){
         }
         curr = curr->next;
     }
+     */
     // return counter
     return counter;
 }
 
 size_t _num_free_bytes(){
+
     // like free_block but instead of return the amount of them, return the amount of sizes
 
     // init total_free_space
     size_t total_free_space = 0;
+    /*
     // move on the list
     MallocMetadata* curr = sorted_list;
     // for every block isfree==true make += total_free_space
     while (curr != NULL){
         if (curr->is_free==true){
-            total_free_space += curr->size;
+            total_free_space += curr->order;
         }
         curr = curr->next;
     }
     // return total_free_space
+     */
     return total_free_space;
 }
 
 size_t _num_allocated_blocks(){
     //return counter_total_blocks
     return counter_total_blocks;
-}
+    }
 
 size_t _num_allocated_bytes(){
+
     // like free_byte without the condition of is_free == true
 
     // init total_space
     size_t total_space = 0;
+    /*
     // move on the list
     MallocMetadata* curr = sorted_list;
     // for every block isfree==true make += total_space
     while (curr != NULL){
-        total_space += curr->size;
+        total_space += curr->order;
         curr = curr->next;
     }
+     */
     // return total_space
     return total_space;
 }
