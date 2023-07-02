@@ -15,18 +15,23 @@
 
 #define DEBUG_PRINT
 
+#define SIZE_OF_ORDER(x) ((size_t)(MIN_SIZE<<(x)))
+
 #define MAX_ORDER 10
 #define MIN_SIZE ((size_t)128)
 #define MAX_SIZE (SIZE_OF_ORDER(MAX_ORDER))
-#define SIZE_OF_ORDER(x) ((size_t)(MIN_SIZE<<(x)))
 #define INITIAL_BLOCK_NUM 32
+#define SIZE_LIMITATION 100000000
+
+#define PROT_READ 1
+#define PROT_WRITE 2
+
 
 int counter_total_blocks = 0;
 bool system_initialized = false;
 int global_magic = 0;
 
 
-//TODO: address structure for meta_data - theirs or like ATAM?
 struct MallocMetadata {
     int magic_num;
     int order;
@@ -36,6 +41,7 @@ struct MallocMetadata {
     MallocMetadata(int init_order = 0, bool init_is_free = false, MallocMetadata* init_next = nullptr, MallocMetadata* init_prev = nullptr);
     MallocMetadata(const MallocMetadata& other) = default;
 };
+
 
 //TODO: check metadata in every access
 
@@ -175,7 +181,64 @@ bool BlockList::is_empty() const {
 }
 
 BlockList block_lists[MAX_ORDER+1];
+/*-----------------------------------
+ *  LINK LIST for the big_allocations
+ ------------------------------------*/
 // TODO: another linklist for big_allocations
+
+class List{
+private:
+    int m_list_size;
+    MallocMetadata* m_first;
+public:
+    List();
+    List(const List& other) = delete;
+    const List& operator=(const List& other) = delete;
+
+    void addToList (MallocMetadata* new_block);
+    void remove_block(MallocMetadata* block_to_remove);
+};
+
+List::List(): m_list_size(0), m_first(nullptr) {}
+
+void List::addToList(MallocMetadata* new_block) {
+    MallocMetadata* prev_head = m_first;
+    // add the new big block in the head of the list
+    m_first = new_block;
+    // update the next block of it to be the prev head of the list
+    new_block->next = prev_head;
+    // if the list wasnt empty before, update the prev of the last head to be the new head
+    if (prev_head!= nullptr){
+        prev_head->prev = new_block;
+    }
+}
+
+void List::remove_block(MallocMetadata *block_to_remove) {
+    MallocMetadata* curr = m_first;
+    MallocMetadata* prev_of_removed;
+    while (curr != nullptr){
+
+        if (curr == block_to_remove){
+            prev_of_removed = block_to_remove->prev;
+
+            // update the block_to_remove->prev->next = block_to_remove->next
+            if (prev_of_removed != nullptr){
+                prev_of_removed->next = block_to_remove->next;
+            }
+
+            // update the block_to_remove->next->prev = block_to_remove->prev
+            if (block_to_remove->next != nullptr){
+                block_to_remove->next->prev = prev_of_removed;
+            }
+        }
+
+        // continue to the next block
+        curr=curr->next;
+    }
+}
+
+List big_block_list;
+
 
 /*----------------------------------
  initialize the system:
@@ -309,7 +372,7 @@ MallocMetadata* findTheMatchBlock(size_t wanted_size) {
     for (int curr_order = wanted_order; curr_order <= MAX_ORDER && match_block == nullptr; curr_order++) {
         match_block = block_lists[curr_order].popFirst();
     }
-    // if maching block not found:
+    // if matching block not found:
     if (match_block == nullptr) {
         std::cout << "error: the memory is full!" << std::endl;
     }
@@ -320,130 +383,45 @@ MallocMetadata* findTheMatchBlock(size_t wanted_size) {
     return match_block;
 }
 
-/*
-void add_to_list(void* new_block){
-    MallocMetadata* Malloc_new_block = (MallocMetadata*)new_block;
+/*---------------------------------------
+ * large allocations:
+----------------------------------------*/
 
-    // if first block - update the global list pointer + counter
-    if(sorted_list==NULL){
-        sorted_list = Malloc_new_block;
-        counter_total_blocks++;
-        return;
-    }
-
-    // create temp
-    MallocMetadata* head = sorted_list;
-    MallocMetadata* temp = head;
-
-    // run the allocated blocks and find the right spot to enter the Malloc_new_block
-    while (temp!=NULL) {
-        // if need to be before temp
-        if (Malloc_new_block < temp) {
-            // save the temp_prev
-            MallocMetadata *temp_prev = temp->prev;
-
-            // update the prev to point on the Malloc_new_block
-            if (temp_prev != NULL){
-                temp_prev->next = Malloc_new_block;
-            }
-                // if temp_prev == NULL - means temp was the first elem
-            else {
-                sorted_list = Malloc_new_block;
-            }
-
-            // update the Malloc_new_block to point on the curr from back and on the prev curr.prev from back
-            Malloc_new_block->prev = temp_prev;
-            Malloc_new_block->next = temp;
-
-            // update the curr.prev to point on Malloc_new_block
-            temp->prev = Malloc_new_block;
-
-            // if enter before the first one - update the global list pointer
-            if (head==temp){
-                sorted_list = Malloc_new_block;
-            }
-
-            // found the right spot so can break the loop
-            break;
-        }
-
-            // if address of Malloc_new_block is the largest, enter at the end
-        else if (temp->next==NULL){
-            temp->next = Malloc_new_block;
-            Malloc_new_block->prev - temp;
-            break;
-        }
-
-        else {
-            // advance temp
-            temp = temp->next;
-        }
-    }
-
-    // increase the amount of blocks
-    counter_total_blocks++;
-    return;
+void* allocate_big_block(size_t wanted_size){
+    void* result = mmap(NULL, wanted_size+sizeof(MallocMetadata), PROT_READ | PROT_WRITE, MAP_ANONYMOUS, -1, 0);
+    return result;
 }
 
-void* find_free_block(size_t size){
-    // move on the "free_list"
-    MallocMetadata* temp = sorted_list;
-    // search for fit block
-    while (temp != NULL){
-        if (temp->is_free == true && temp->size>=size){
-            // if found - allocate it
-            temp->is_free=false;
-            // update the counters by the size of the block (not by size 10/1000 example)
-
-            // return pointer to start
-            return temp;
-        }
-            // else size is not enough
-        else{
-            temp = temp->next;
-        }
-    }
-    return NULL;
+int free_big_block(MallocMetadata* block_to_delete){
+    int result = munmap((void*)block_to_delete, (size_t)((block_to_delete->order)+sizeof(MallocMetadata)));
+    return result;
 }
 
+/*---------------------------------------
+ * implement the relevant functions:
+----------------------------------------*/
 
 void* smalloc(size_t size){
     // check size
-    if (size == 0 || size > MAXSIZE){
-        return NULL;
+    if (size == 0 || size > SIZE_LIMITATION){
+        return nullptr;
+    }
+    int wanted_order = findMatchOrder(size);
+    // big size:
+    if (wanted_order == -1) {
+        return allocate_big_block(size);
     }
 
-    void* new_block = find_free_block(size);
-    if (new_block!=NULL){
-        return new_block;
+    // regular size:
+    MallocMetadata* new_block = findTheMatchBlock(wanted_order);
+    // if the memory is full:
+    if (new_block == nullptr) {
+        return nullptr;
     }
-
-    // else if  - sbrk
-    // new_block holds the address of the metadata
-    new_block = sbrk(size + sizeof(MallocMetadata));
-
-    //if sbrk succeeded
-    if(new_block != (void*)(-1)){
-
-        //create the metaData for the allocation
-        MallocMetadata metadata;
-        metadata.size=size;
-        metadata.is_free=false;
-        metadata.prev=NULL;
-        metadata.next=NULL;
-
-        // put the metadata struct in the place we allocate - convert the address from void* to metadata* and saved in new_block the metadata
-        *(MallocMetadata*)new_block = metadata;
-
-        // add to the allocations list
-        add_to_list(new_block);
-
-        // return pointer to start of block
-        return ((void*)((MallocMetadata*)new_block + sizeof(MallocMetadata)));
-    }
-
-    // else (sbrk fail)
-    return NULL;
+    assert(new_block->is_free);
+    assert(new_block->order == wanted_order);
+    new_block->is_free = false;
+    return (void*) (new_block+1);
 }
 
 
@@ -473,7 +451,7 @@ void sfree(void* p){
 
 void* srealloc(void* oldp, size_t size){
     // check size and pointer
-    if (size == 0 || size > MAXSIZE){
+    if (size == 0 || size > SIZE_LIMITATION){
         return NULL;
     }
     void* result;
