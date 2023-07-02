@@ -526,7 +526,7 @@ void* big_block_realloc(MallocMetadata* old_block, size_t size){
     void* new_block = nullptr;
 
     // if size is equal so return the current block
-    if (old_block->order == size){
+    if ((size_t)old_block->order == size){
         return old_block;
     }
     // else size is different and needed to mmap new block and munmap the previous one
