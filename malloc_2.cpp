@@ -140,7 +140,8 @@ void* smalloc(size_t size){
         add_to_list(new_block);
 
         // return pointer to start of block
-        return ((void*)((MallocMetadata*)new_block + sizeof(MallocMetadata)));
+        // TODO: 1 is correct?
+        return ((void*)((MallocMetadata*)new_block + 1));
     }
 
     // else (sbrk fail)
