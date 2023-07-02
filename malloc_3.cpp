@@ -13,6 +13,7 @@
 #include <iostream>
 #include <assert.h>
 #include <sys/mman.h>
+#include <cstdlib>
 
 #define DEBUG_PRINT
 
@@ -50,6 +51,16 @@ MallocMetadata::MallocMetadata(int init_order, bool init_is_free, MallocMetadata
         next(init_next),
         prev(init_prev) {}
 
+
+/*---------------------------------------
+* safety & security check
+----------------------------------------*/
+
+void safety(MallocMetadata* block){
+    if (block->magic_num != global_magic) {
+        exit(0xdeadbeef);
+    }
+}
 
 /*-------------------------------------------------
  * class BlockList:
@@ -439,6 +450,8 @@ void* scalloc(size_t num, size_t size){
     MallocMetadata* block_data = (MallocMetadata*)new_block;
     block_data--;
     assert(block_data->is_free == false);
+    assert(block_data->magic_num == global_magic);
+
     size_t size_to_zero = (block_data->order <= MAX_ORDER) ? (SIZE_OF_ORDER(block_data->order)-sizeof(MallocMetadata)) : block_data->order;
     // put 0
     std::memset(new_block, 0, size_to_zero);
@@ -454,6 +467,9 @@ void sfree(void* p){
     }
     // else - free means get the right address and update flag
     MallocMetadata* to_free = (MallocMetadata*)p - 1;
+
+    safety(to_free);
+
     to_free->is_free= true;
 
     // regular block:
