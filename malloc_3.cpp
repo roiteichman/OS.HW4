@@ -23,9 +23,6 @@
 #define INITIAL_BLOCK_NUM 32
 #define SIZE_LIMITATION 100000000
 
-#define PROT_READ 1
-#define PROT_WRITE 2
-
 
 int counter_total_blocks = 0;
 bool system_initialized = false;
@@ -385,9 +382,9 @@ MallocMetadata* findTheMatchBlock(int wanted_order) {
  * large allocations:
 ----------------------------------------*/
 
-void* allocate_big_block(size_t wanted_size){
+MallocMetadata* allocate_big_block(size_t wanted_size){
     void* result = mmap(NULL, wanted_size+sizeof(MallocMetadata), PROT_READ | PROT_WRITE, MAP_ANONYMOUS, -1, 0);
-    return result;
+    return (MallocMetadata*)result;
 }
 
 int free_big_block(MallocMetadata* block_to_delete){
@@ -408,7 +405,11 @@ void* smalloc(size_t size){
     int wanted_order = findMatchOrder(size);
     // big size:
     if (wanted_order == -1) {
-        return allocate_big_block(size);
+        new_block = allocate_big_block(size);
+        if (new_block != nullptr) {
+            counter_total_blocks++;
+        }
+        return (void*)(new_block+1);
     }
 
     // regular size:
@@ -420,6 +421,7 @@ void* smalloc(size_t size){
     assert(new_block->is_free);
     assert(new_block->order == wanted_order);
     new_block->is_free = false;
+    counter_total_blocks++;
     return (void*) (new_block+1);
 }
 
