@@ -544,11 +544,13 @@ void* big_block_realloc(MallocMetadata* old_block, size_t size){
 void* srealloc(void* oldp, size_t size){
     init();
 
+    MallocMetadata* old_block = (MallocMetadata*)oldp-1;
+
+    safety(old_block);
     // check size and pointer
     if (size == 0 || size > SIZE_LIMITATION){
-        return NULL;
+        return nullptr;
     }
-    void* result = nullptr;
 
     int wanted_order = findMatchOrder(size);
     // if big block:
@@ -556,66 +558,26 @@ void* srealloc(void* oldp, size_t size){
         return big_block_realloc(old_block, size);
 
     // else regular block
-    else {
+    size_t src_size = SIZE_OF_ORDER(old_block->order)-sizeof(MallocMetadata);
+    // try to merge until the wanted size:
 
+    while (old_block->order < wanted_order) {
+        if (merge(&old_block) == false) break;
     }
-
-    /*
-    MallocMetadata* new_block = nullptr;
-        new_block = allocate_big_block(size);
-        if (new_block != nullptr) {
-            counter_total_blocks++;
-        }
-        return (void*)(new_block+1);
+    // if the block is big enough:
+    if (old_block->order == wanted_order) {
+        std::memmove((void*)old_block, oldp, src_size);
+        return (void*)(old_block+1);
     }
+    // alloc another block:
+    void* new_block = nullptr;
+    new_block = smalloc(size);
 
-    // regular size:
-    new_block = findTheMatchBlock(wanted_order);
-    // if the memory is full:
-    if (new_block == nullptr) {
-        return nullptr;
+    if (new_block != nullptr) {
+        std::memmove(new_block, oldp, src_size);
+        sfree((void*)(old_block+1));
     }
-    assert(new_block->is_free);
-    assert(new_block->order == wanted_order);
-    new_block->is_free = false;
-    counter_total_blocks++;
-    return (void*) (new_block+1);
-    */
-
-/*
-    // if oldp == NULL allocate size bytes and return
-    if (oldp == NULL){
-        result = smalloc(size);
-        if (result!=NULL){
-            return result;
-        }
-        return NULL;
-
-    }
-
-    // if size < oldp.size() return oldp
-    MallocMetadata* old_block = (MallocMetadata*)oldp-sizeof(MallocMetadata);
-    if (size <= old_block->order){
-        return oldp;
-    }
-        // else need to get new allocation
-    else{
-        // result = smalloc()
-        result = smalloc(size);
-        // if allocation fail - return NULL and dont sfree the oldp
-        if  (result == NULL){
-            return NULL;
-        }
-            // else - allocation succeeded
-        else {
-            // copy the content - with std::memmove()
-            std::memmove(result, oldp, old_block->order);
-            // sfree oldp
-            sfree(oldp);
-            // return
-            return result;
-        }
-    }*/
+    return new_block;
 }
 
 size_t _num_free_blocks(){
