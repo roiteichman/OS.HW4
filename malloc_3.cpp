@@ -267,7 +267,7 @@ void init() {
         block_lists[order].setOrder (order);
     }
 
-    unsigned long curr_program_break = (unsigned long)sbrk(0);
+    unsigned long long curr_program_break = (unsigned long long)sbrk(0);
     sbrk(MAX_SIZE - (curr_program_break % MAX_SIZE));
 //    void* t = sbrk(0);
 //    printf("%x\n", (unsigned long)t);
@@ -320,7 +320,7 @@ MallocMetadata* splitBlock (MallocMetadata* curr_block) {
 // the function assume that cuur_block is not in list, but all the other free blocks are in lists.
 MallocMetadata* mergeToList (MallocMetadata* curr_block) {
     assert(curr_block->is_free);
-    assert((unsigned long)curr_block % SIZE_OF_ORDER(curr_block->order) == 0);
+    assert((unsigned long long)curr_block % SIZE_OF_ORDER(curr_block->order) == 0);
     if (curr_block->order == MAX_ORDER) {
         return nullptr;
     }
