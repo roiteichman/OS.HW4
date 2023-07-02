@@ -26,7 +26,8 @@
 #define SIZE_LIMITATION 100000000
 
 
-int counter_total_blocks = 0;
+int counter_total_blocks_used = 0;
+size_t counter_total_bytes_used = 0;
 bool system_initialized = false;
 int global_magic = 0;
 
@@ -74,7 +75,7 @@ public:
     const BlockList& operator=(const BlockList& other) = delete;
 
     void setOrder(int order);
-    bool is_empty() const;
+    int len() const;
     void addToList (MallocMetadata* metadata);
     MallocMetadata* popFirst();
     void remove_block(MallocMetadata* block_to_remove);
@@ -185,8 +186,8 @@ void BlockList::remove_block(MallocMetadata *block_to_remove) {
     m_blocks_num--;
 }
 
-bool BlockList::is_empty() const {
-    return (m_blocks_num == 0);
+int BlockList::len() const {
+    return m_blocks_num;
 }
 
 BlockList block_lists[MAX_ORDER+1];
@@ -346,6 +347,7 @@ MallocMetadata* mergeToList (MallocMetadata* curr_block) {
         // if the buddy is in right:
         if ((unsigned long long) curr_block % SIZE_OF_ORDER(curr_block->order + 1) == 0) {
             buddy = curr_block + SIZE_OF_ORDER(curr_block->order)/sizeof(MallocMetadata);
+            safety(buddy);
             assert(buddy->order <= curr_block->order);
             //if the current buddy is allocated:
             if (buddy->order < curr_block->order || !buddy->is_free) {
@@ -356,6 +358,7 @@ MallocMetadata* mergeToList (MallocMetadata* curr_block) {
         // if the buddy is in left:
         else {
             buddy = curr_block - SIZE_OF_ORDER(curr_block->order)/sizeof(MallocMetadata);
+            safety(buddy);
             assert(buddy->order <= curr_block->order);
             if (buddy->order < curr_block->order || buddy->is_free) {
                 curr_block = buddy;
@@ -421,6 +424,7 @@ MallocMetadata* allocate_big_block(size_t wanted_size){
 }
 
 int free_big_block(MallocMetadata* block_to_delete){
+    big_block_list.remove_block(block_to_delete);
     int result = munmap((void*)block_to_delete, (size_t)((block_to_delete->order)+sizeof(MallocMetadata)));
     if (result == -1){
         big_block_list.addToList(block_to_delete);
@@ -443,9 +447,6 @@ void* smalloc(size_t size){
     // big size:
     if (wanted_order == -1) {
         new_block = allocate_big_block(size);
-        if (new_block != nullptr) {
-            counter_total_blocks++;
-        }
         return (void*)(new_block+1);
     }
 
@@ -458,7 +459,8 @@ void* smalloc(size_t size){
     assert(new_block->is_free);
     assert(new_block->order == wanted_order);
     new_block->is_free = false;
-    counter_total_blocks++;
+    counter_total_blocks_used++;
+    counter_total_bytes_used += (SIZE_OF_ORDER(new_block->order)-sizeof(MallocMetadata));
     return (void*) (new_block+1);
 }
 
@@ -495,6 +497,8 @@ void sfree(void* p){
     safety(to_free);
 
     to_free->is_free= true;
+    counter_total_blocks_used--;
+    counter_total_bytes_used -= (SIZE_OF_ORDER(to_free->order)-sizeof(MallocMetadata));
 
     // regular block:
     if (to_free->order <= MAX_ORDER) {
@@ -629,17 +633,14 @@ size_t _num_allocated_bytes(){
 
     // like free_byte without the condition of is_free == true
 
-    // init total_space
-    size_t total_space = 0;
-    /*
-    // move on the list
-    MallocMetadata* curr = sorted_list;
-    // for every block isfree==true make += total_space
-    while (curr != NULL){
-        total_space += curr->order;
-        curr = curr->next;
+    // init total_space with the small allocated:
+    size_t total_space = counter_total_bytes_used;
+    // add the big allocated:
+    total_space += big_block_list.allocated_bytes();
+    // add the small free:
+    for (int i = 0; i<=MAX_ORDER; i++) {
+        total_space += block_lists[i].len()*(SIZE_OF_ORDER(i)-sizeof(MallocMetadata));
     }
-     */
     // return total_space
     return total_space;
 }
