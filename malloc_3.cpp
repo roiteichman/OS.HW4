@@ -470,7 +470,7 @@ void sfree(void* p){
 
 void* srealloc(void* oldp, size_t size){
     init();
-    void* result;
+    void* result = nullptr;
     /*
     // check size and pointer
     if (size == 0 || size > SIZE_LIMITATION){
