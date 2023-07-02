@@ -309,7 +309,7 @@ MallocMetadata* splitBlock (MallocMetadata* curr_block) {
 
 // the function merge the blocks iteratively until max size and remove the buddies from the lists, then insert the result to the match list.
 // the function assume that cuur_block is not in list, but all the other free blocks are in lists.
-MallocMetadata* mergeBlock (MallocMetadata* curr_block) {
+MallocMetadata* mergeToList (MallocMetadata* curr_block) {
     assert(curr_block->is_free);
     assert((unsigned long)curr_block % SIZE_OF_ORDER(curr_block->order) == 0);
     if (curr_block->order == MAX_ORDER) {
@@ -362,11 +362,8 @@ int findMatchOrder (size_t wanted_size) {
     return -1;
 }
 
-MallocMetadata* findTheMatchBlock(size_t wanted_size) {
-    int wanted_order = findMatchOrder(wanted_size);
-    if (wanted_order == -1) {
-        return nullptr;
-    }
+MallocMetadata* findTheMatchBlock(int wanted_order) {
+
     MallocMetadata* match_block = nullptr;
     // find the block with the minimal order:
     for (int curr_order = wanted_order; curr_order <= MAX_ORDER && match_block == nullptr; curr_order++) {
@@ -375,6 +372,7 @@ MallocMetadata* findTheMatchBlock(size_t wanted_size) {
     // if matching block not found:
     if (match_block == nullptr) {
         std::cout << "error: the memory is full!" << std::endl;
+        return nullptr;
     }
     // set the block to the correct size:
     while (match_block->order > wanted_order) {
@@ -426,29 +424,42 @@ void* smalloc(size_t size){
 
 
 void* scalloc(size_t num, size_t size){
-    //like smalloc with ZERO
-
     // call smalloc
     void* new_block = smalloc(num * size);
-    if (new_block == NULL){
-        return NULL;
+    if (new_block == nullptr){
+        return nullptr;
     }
-    // if not NULL memset 0
-    std::memset(new_block, 0, num * size);
+    // if not NULL - find size to put 0:
+    MallocMetadata* block_data = (MallocMetadata*)new_block;
+    block_data--;
+    assert(block_data->is_free == false);
+    size_t size_to_zero = (block_data->order <= MAX_ORDER) ? (SIZE_OF_ORDER(block_data->order)-sizeof(MallocMetadata)) : block_data->order;
+    // put 0
+    std::memset(new_block, 0, size_to_zero);
 
     return new_block;
 }
 
 void sfree(void* p){
     // check if p is null or meta_data flag is free (p-size(meta_data))
-    if (p == NULL){
+    if (p == nullptr){
         return;
     }
     // else - free means get the right address and update flag
     MallocMetadata* to_free = (MallocMetadata*)p - sizeof(MallocMetadata);
     to_free->is_free= true;
+
+    // regular block:
+    if (to_free->order <= MAX_ORDER) {
+        mergeToList(to_free);
+    }
+    // big block:
+    else {
+        free_big_block(to_free);
+    }
 }
 
+/*
 void* srealloc(void* oldp, size_t size){
     // check size and pointer
     if (size == 0 || size > SIZE_LIMITATION){
