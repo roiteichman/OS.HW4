@@ -426,6 +426,9 @@ MallocMetadata* allocate_big_block(size_t wanted_size){
         *(MallocMetadata*)result = tmp;
         big_block_list.addToList((MallocMetadata*)result);
     }
+    else {
+        perror("mmap fail: ");
+    }
     return (MallocMetadata*)result;
 }
 
@@ -434,6 +437,7 @@ int free_big_block(MallocMetadata* block_to_delete){
     int result = munmap((void*)block_to_delete, (size_t)((block_to_delete->order)+sizeof(MallocMetadata)));
     if (result == -1){
         big_block_list.addToList(block_to_delete);
+        perror("munmap fail: ");
     }
     return result;
 }
@@ -512,13 +516,30 @@ void sfree(void* p){
     }
     // big block:
     else {
-        if(free_big_block(to_free)==-1){
-            // munmap failed
-        }
+        free_big_block(to_free);
     }
 }
 
 //TODO: implement from here
+
+void* big_block_realloc(MallocMetadata* old_block, size_t size){
+    void* new_block = nullptr;
+
+    // if size is equal so return the current block
+    if (old_block->order == size){
+        return old_block;
+    }
+    // else size is different and needed to mmap new block and munmap the previous one
+    else{
+        new_block = smalloc(size);
+    }
+    if (new_block != nullptr) {
+        std::memmove(new_block,(void*)(old_block+1), old_block->order);
+        sfree((void*)(old_block+1));
+    }
+    return new_block;
+}
+
 
 void* srealloc(void* oldp, size_t size){
     init();
@@ -532,8 +553,8 @@ void* srealloc(void* oldp, size_t size){
     int wanted_order = findMatchOrder(size);
     // if big block:
     if (wanted_order == -1) {
+        return big_block_realloc(old_block, size);
 
-    }
     // else regular block
     else {
 
