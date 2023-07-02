@@ -328,20 +328,20 @@ MallocMetadata* mergeToList (MallocMetadata* curr_block) {
 
     while(curr_block->order < MAX_ORDER) {
         // if the buddy is in right:
-        if ((unsigned long) curr_block % SIZE_OF_ORDER(curr_block->order + 1) == 0) {
-            buddy = (MallocMetadata *) (curr_block + SIZE_OF_ORDER(curr_block->order)/sizeof(MallocMetadata));
-            assert(buddy->order == curr_block->order);
+        if ((unsigned long long) curr_block % SIZE_OF_ORDER(curr_block->order + 1) == 0) {
+            buddy = curr_block + SIZE_OF_ORDER(curr_block->order)/sizeof(MallocMetadata);
+            assert(buddy->order <= curr_block->order);
             //if the current buddy is allocated:
-            if (!buddy->is_free) {
+            if (buddy->order < curr_block->order || !buddy->is_free) {
                 break;
             }
         }
 
         // if the buddy is in left:
         else {
-            buddy = (MallocMetadata *) (curr_block - SIZE_OF_ORDER(curr_block->order));
-            assert(buddy->order == curr_block->order);
-            if (buddy->is_free) {
+            buddy = curr_block - SIZE_OF_ORDER(curr_block->order)/sizeof(MallocMetadata);
+            assert(buddy->order <= curr_block->order);
+            if (buddy->order < curr_block->order || buddy->is_free) {
                 curr_block = buddy;
             }
             //if the current buddy is allocated:
