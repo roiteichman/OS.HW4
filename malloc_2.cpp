@@ -97,7 +97,7 @@ void* find_free_block(size_t size){
             // update the counters by the size of the block (not by size 10/1000 example)
 
             // return pointer to start
-            return temp;
+            return temp+1;
         }
             // else size is not enough
         else{
