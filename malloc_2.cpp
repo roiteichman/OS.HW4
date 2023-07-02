@@ -279,7 +279,7 @@ size_t _size_meta_data(){
     return sizeof(MallocMetadata);
 }
 
-
+/*
 int main(){
 
     void* a = smalloc(32);
@@ -320,4 +320,4 @@ int main(){
     //printf("c: %p\n", c);
     //printf("d: %p\n", d);
     return 0;
-}
+}*/
