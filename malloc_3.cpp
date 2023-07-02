@@ -486,12 +486,46 @@ void sfree(void* p){
 
 void* srealloc(void* oldp, size_t size){
     init();
-    void* result = nullptr;
-    /*
+
     // check size and pointer
     if (size == 0 || size > SIZE_LIMITATION){
         return NULL;
     }
+    void* result = nullptr;
+
+    int wanted_order = findMatchOrder(size);
+    // if big block:
+    if (wanted_order == -1) {
+
+    }
+    // else regular block
+    else {
+
+    }
+
+
+    /*
+    MallocMetadata* new_block = nullptr;
+        new_block = allocate_big_block(size);
+        if (new_block != nullptr) {
+            counter_total_blocks++;
+        }
+        return (void*)(new_block+1);
+    }
+
+    // regular size:
+    new_block = findTheMatchBlock(wanted_order);
+    // if the memory is full:
+    if (new_block == nullptr) {
+        return nullptr;
+    }
+    assert(new_block->is_free);
+    assert(new_block->order == wanted_order);
+    new_block->is_free = false;
+    counter_total_blocks++;
+    return (void*) (new_block+1);
+    */
+
 
     // if oldp == NULL allocate size bytes and return
     if (oldp == NULL){
@@ -526,8 +560,6 @@ void* srealloc(void* oldp, size_t size){
             return result;
         }
     }
-     */
-    return result; // TODO: delete this line after that
 }
 
 size_t _num_free_blocks(){
