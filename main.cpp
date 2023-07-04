@@ -12,26 +12,34 @@
 
 using namespace std;
 
+#define LEN 90
 
+template <class T>
+void printArr(T* arr, int len) {
+    for (int i = 0; i< len; i++) {
+        cout << *(arr++) << " ";
+    }
+    cout << endl;
+}
 
+void print_values() {
+    cout << "free blocks: " << _num_free_blocks() << endl;
+    cout << "all blocks: " << _num_allocated_blocks() << endl;
+    cout << "free bytes: " << _num_free_bytes() << endl;
+    cout << "all bytes: " << _num_allocated_bytes() << endl;
+}
 
 int main() {
-
-    init();
-
-    MallocMetadata* ptr = block_lists[MAX_ORDER].popFirst();
-    block_lists[MAX_ORDER].addToList(ptr);
-    for (int i=0; i<MAX_ORDER-6; i++) {
-        splitBlock(ptr);
+    void* ptr1 = smalloc(4);
+    print_values();
+    /*
+    void* arr[LEN];
+    for (int i=0 ; i<LEN; i++) {
+        arr[i] = smalloc(i);
     }
-    MallocMetadata* ptr2 = block_lists[MAX_ORDER].popFirst();
-    for (int i=0; i<MAX_ORDER-4; i++) {
-        splitBlock(ptr2);
+    for (int i=0 ; i<LEN; i++) {
+        sfree(arr[i]);
     }
-    cout << "the chosen block:" << endl;
-    printMetadata(findTheMatchBlock(10));
-
-    print_all_lists();
-
+     */
     return 0;
 }

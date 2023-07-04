@@ -256,7 +256,7 @@ int List::get_len() const {
 }
 
 size_t List::allocated_bytes() const {
-    size_t result;
+    size_t result = 0;
     for (MallocMetadata* ptr = m_first; ptr != nullptr; ptr = ptr->next) {
         result += ptr->order;
     }
@@ -485,8 +485,7 @@ void* scalloc(size_t num, size_t size){
         return nullptr;
     }
     // if not NULL - find size to put 0:
-    MallocMetadata* block_data = (MallocMetadata*)new_block;
-    block_data--;
+    MallocMetadata* block_data = (MallocMetadata*)new_block -1;
     assert(block_data->is_free == false);
     assert(block_data->magic_num == global_magic);
 
@@ -583,6 +582,11 @@ void* srealloc(void* oldp, size_t size){
     }
     return new_block;
 }
+
+/*----------------------------------
+ * num of used blocks and bytes:
+ ----------------------------------*/
+
 
 size_t _num_free_blocks(){
     if(!system_initialized){
