@@ -510,9 +510,9 @@ void sfree(void* p){
 
     // regular block:
     if (to_free->order <= MAX_ORDER) {
-        mergeToList(to_free);
         counter_total_blocks_used--;
         counter_total_bytes_used -= (SIZE_OF_ORDER(to_free->order)-sizeof(MallocMetadata));
+        mergeToList(to_free);
     }
     // big block:
     else {
