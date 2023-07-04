@@ -619,6 +619,10 @@ size_t _num_allocated_blocks(){
 
 size_t _num_allocated_bytes(){
 
+    if(!system_initialized){
+        return 0;
+    }
+
     // like free_byte without the condition of is_free == true
 
     // init total_space with the small allocated:
