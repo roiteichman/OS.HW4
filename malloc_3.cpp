@@ -591,7 +591,7 @@ size_t _num_free_blocks(){
 
     // get the number of small free blocks
     for (int i = 0; i <= MAX_ORDER; ++i) {
-        counter += block_lists->len();
+        counter += block_lists[i].len();
     }
 
     // mind that big blocks are not freed
@@ -610,7 +610,7 @@ size_t _num_free_bytes(){
     size_t total_free_space = 0;
 
     for (int i = 0; i <= MAX_ORDER; ++i) {
-        total_free_space += (block_lists->len())*(SIZE_OF_ORDER(i)-sizeof(MallocMetadata));
+        total_free_space += (block_lists[i].len())*(SIZE_OF_ORDER(i)-sizeof(MallocMetadata));
     }
 
     // mind that big blocks are not freed
