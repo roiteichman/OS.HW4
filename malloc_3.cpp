@@ -511,7 +511,9 @@ void sfree(void* p){
     // regular block:
     if (to_free->order <= MAX_ORDER) {
         counter_total_blocks_used--;
+        assert(counter_total_blocks_used >= 0);
         counter_total_bytes_used -= (SIZE_OF_ORDER(to_free->order)-sizeof(MallocMetadata));
+        assert(counter_total_bytes_used >= 0);
         mergeToList(to_free);
     }
     // big block:
@@ -634,7 +636,7 @@ size_t _num_allocated_bytes(){
     // like free_byte without the condition of is_free == true
 
     // init total_space with the small allocated:
-    size_t total_space=0;// = counter_total_bytes_used;
+    size_t total_space = counter_total_bytes_used;
     // add the big allocated:
     total_space += big_block_list.allocated_bytes();
     // add the small free:
