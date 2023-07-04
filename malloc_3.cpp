@@ -507,12 +507,12 @@ void sfree(void* p){
     safety(to_free);
 
     to_free->is_free= true;
-    counter_total_blocks_used--;
-    counter_total_bytes_used -= (SIZE_OF_ORDER(to_free->order)-sizeof(MallocMetadata));
 
     // regular block:
     if (to_free->order <= MAX_ORDER) {
         mergeToList(to_free);
+        counter_total_blocks_used--;
+        counter_total_bytes_used -= (SIZE_OF_ORDER(to_free->order)-sizeof(MallocMetadata));
     }
     // big block:
     else {
