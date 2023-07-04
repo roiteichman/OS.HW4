@@ -469,6 +469,8 @@ void* smalloc(size_t size){
     assert(new_block->is_free);
     assert(new_block->order == wanted_order);
     new_block->is_free = false;
+    assert(counter_total_blocks_used >= 0);
+    assert(counter_total_bytes_used >= 0);
     counter_total_blocks_used++;
     counter_total_bytes_used += (SIZE_OF_ORDER(new_block->order)-sizeof(MallocMetadata));
     return (void*) (new_block+1);
@@ -624,7 +626,7 @@ size_t _num_allocated_blocks(){
     if(!system_initialized){
         return 0;
     }
-    return counter_total_blocks_used+_num_free_blocks()+big_block_list.get_len();
+    return counter_total_blocks_used+ _num_free_blocks() +big_block_list.get_len();
     }
 
 size_t _num_allocated_bytes(){
