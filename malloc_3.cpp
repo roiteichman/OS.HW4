@@ -638,9 +638,7 @@ size_t _num_allocated_bytes(){
     // add the big allocated:
     total_space += big_block_list.allocated_bytes();
     // add the small free:
-    for (int i = 0; i<=MAX_ORDER; i++) {
-        total_space += block_lists[i].len()*(SIZE_OF_ORDER(i)-sizeof(MallocMetadata));
-    }
+    total_space += _num_free_bytes();
     // return total_space
     return total_space;
 }
