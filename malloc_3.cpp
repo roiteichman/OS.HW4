@@ -606,9 +606,9 @@ void* srealloc(void* oldp, size_t size){
 
 
 size_t _num_free_blocks(){
-    if(!system_initialized){
+    /*if(!system_initialized){
         return 0;
-    }
+    }*/
     // sum len of block_list for every entry
 
     // init counter
@@ -626,9 +626,9 @@ size_t _num_free_blocks(){
 }
 
 size_t _num_free_bytes(){
-    if(!system_initialized){
+    /*if(!system_initialized){
         return 0;
-    }
+    }*/
     // like free_block but instead of return the len*(sizeof(order)-metadata)
 
     // init total_free_space
@@ -644,17 +644,17 @@ size_t _num_free_bytes(){
 }
 
 size_t _num_allocated_blocks(){
-    if(!system_initialized){
+    /*if(!system_initialized){
         return 0;
-    }
+    }*/
     return counter_total_blocks_used+ _num_free_blocks() +big_block_list.get_len();
     }
 
 size_t _num_allocated_bytes(){
 
-    if(!system_initialized){
+    /*if(!system_initialized){
         return 0;
-    }
+    }*/
 
     // like free_byte without the condition of is_free == true
 
