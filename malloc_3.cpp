@@ -426,10 +426,8 @@ MallocMetadata* allocate_big_block(size_t wanted_size){
     void* result = mmap(nullptr, wanted_size+sizeof(MallocMetadata), PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
     if (result == (void*)(-1)){
         perror("mmap fail: ");
-        std::cout << "\n\n\n---------------------------------------------------------\nelchanan\n\n\n";
     }
     else {
-        std::cout << "\n\n\n---------------------------------------------------------\nroi\n\n\n";
         MallocMetadata tmp(wanted_size);
         *(MallocMetadata*)result = tmp;
         // entered to list
@@ -533,7 +531,11 @@ void sfree(void* p){
     }
     // big block:
     else {
-        free_big_block(to_free);
+        std::cout << "\n\n\n---------------------------------------------------------\nroi\n\n\n";
+        int result = free_big_block(to_free);
+        if (result == -1) {
+            std::cout << "\n\n\n---------------------------------------------------------\nfail\n\n\n";
+        }
     }
 }
 
