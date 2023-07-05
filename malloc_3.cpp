@@ -599,12 +599,16 @@ void* srealloc(void* oldp, size_t size){
     }
     // else regular block
     size_t src_size = SIZE_OF_ORDER(old_block->order)-sizeof(MallocMetadata);
+    // saved bytes used
+    size_t old_bytes_used = SIZE_OF_ORDER(old_block->order);
     // try to merge until the wanted size:
     while (old_block->order < wanted_order) {
         if (merge(&old_block) == false) break;
     }
     // if the block is big enough:
     if (old_block->order == wanted_order) {
+        // update counter of bytes in used
+        counter_total_bytes_used += (SIZE_OF_ORDER(old_block->order)-old_bytes_used);
         std::memmove((void*)(old_block+1), oldp, src_size);
         return (void*)(old_block+1);
     }
@@ -670,30 +674,6 @@ size_t _num_allocated_blocks(){
     }
 
 size_t _num_allocated_bytes(){
-
-    /*if(!system_initialized){
-        return 0;
-    }*/
-
-    // like free_byte without the condition of is_free == true
-
-    //size_t total_space = 0;
-
-    // add the big allocated:
-    //total_space += big_block_list.allocated_bytes();
-
-    //std::cout << "big_block_list.allocated_bytes= " << total_space << std::endl;
-
-    // start total_space with the small allocated:
-    //total_space+= counter_total_bytes_used;
-
-    //std::cout << "counter_total_bytes_used+big_block_list.allocated_bytes= " << total_space << std::endl;
-
-    // add the small free:
-    //total_space += _num_free_bytes();
-    //std::cout << "total_space= " << total_space << std::endl;
-
-    // return total_space
     return counter_total_bytes_used+big_block_list.allocated_bytes()+_num_free_bytes();
 }
 
