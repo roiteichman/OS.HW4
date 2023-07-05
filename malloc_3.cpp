@@ -519,13 +519,13 @@ void sfree(void* p){
     }
     // else - free means get the right address and update flag
     MallocMetadata* to_free = (MallocMetadata*)p - 1;
+    safety(to_free);
 
     if (to_free->is_free){
         // dont need to free p again - so return
         return;
     }
 
-    safety(to_free);
 
     to_free->is_free= true;
 
