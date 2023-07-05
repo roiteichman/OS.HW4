@@ -256,7 +256,7 @@ int List::get_len() const {
 }
 
 size_t List::allocated_bytes() const {
-    size_t result;
+    size_t result = 0;
     for (MallocMetadata* ptr = m_first; ptr != nullptr; ptr = ptr->next) {
         result += ptr->order;
     }
@@ -469,6 +469,8 @@ void* smalloc(size_t size){
     assert(new_block->is_free);
     assert(new_block->order == wanted_order);
     new_block->is_free = false;
+    assert(counter_total_blocks_used >= 0);
+    assert(counter_total_bytes_used >= 0);
     counter_total_blocks_used++;
     counter_total_bytes_used += ((SIZE_OF_ORDER(new_block->order)-sizeof(MallocMetadata)));
     return (void*) (new_block+1);
@@ -483,8 +485,7 @@ void* scalloc(size_t num, size_t size){
         return nullptr;
     }
     // if not NULL - find size to put 0:
-    MallocMetadata* block_data = (MallocMetadata*)new_block;
-    block_data--;
+    MallocMetadata* block_data = (MallocMetadata*)new_block -1;
     assert(block_data->is_free == false);
     assert(block_data->magic_num == global_magic);
 
@@ -582,10 +583,15 @@ void* srealloc(void* oldp, size_t size){
     return new_block;
 }
 
+/*----------------------------------
+ * num of used blocks and bytes:
+ ----------------------------------*/
+
+
 size_t _num_free_blocks(){
-    /*if(!system_initialized){
+    if(!system_initialized){
         return 0;
-    }*/
+    }
     // sum len of block_list for every entry
 
     // init counter
@@ -603,9 +609,9 @@ size_t _num_free_blocks(){
 }
 
 size_t _num_free_bytes(){
-    /*if(!system_initialized){
+    if(!system_initialized){
         return 0;
-    }*/
+    }
     // like free_block but instead of return the len*(sizeof(order)-metadata)
 
     // init total_free_space
@@ -621,10 +627,10 @@ size_t _num_free_bytes(){
 }
 
 size_t _num_allocated_blocks(){
-    /*if(!system_initialized){
+    if(!system_initialized){
         return 0;
-    }*/
-    return counter_total_blocks_used+_num_free_blocks()+big_block_list.get_len();
+    }
+    return counter_total_blocks_used+ _num_free_blocks() +big_block_list.get_len();
     }
 
 size_t _num_allocated_bytes(){
@@ -646,9 +652,9 @@ size_t _num_allocated_bytes(){
 }
 
 size_t _num_meta_data_bytes(){
-    /*if(!system_initialized){
+    if(!system_initialized){
         return 0;
-    }*/
+    }
     return _num_allocated_blocks()*sizeof(MallocMetadata);
 }
 
