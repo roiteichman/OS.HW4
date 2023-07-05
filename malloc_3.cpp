@@ -224,8 +224,6 @@ void List::addToList(MallocMetadata* new_block) {
         prev_head->prev = new_block;
     }
     m_list_size++;
-    // entered to list
-    std::cout << "\n\n\n---------------------------------------------------------\n\n\n";
 }
 
 void List::remove_block(MallocMetadata *block_to_remove) {
@@ -459,6 +457,8 @@ void* smalloc(size_t size){
     // big size:
     if (wanted_order == -1) {
         new_block = allocate_big_block(size);
+        // entered to list
+        std::cout << "\n\n\n---------------------------------------------------------\nroi\n\n\n";
         return (void*)(new_block+1);
     }
 
