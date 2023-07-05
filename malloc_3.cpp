@@ -229,9 +229,9 @@ void List::addToList(MallocMetadata* new_block) {
 
 void List::remove_block(MallocMetadata *block_to_remove) {
     MallocMetadata* curr = m_first;
-    MallocMetadata* prev_of_removed;
+    MallocMetadata* prev_of_removed = nullptr;
     while (curr != nullptr){
-
+        // found
         if (curr == block_to_remove){
             prev_of_removed = block_to_remove->prev;
 
@@ -239,11 +239,17 @@ void List::remove_block(MallocMetadata *block_to_remove) {
             if (prev_of_removed != nullptr){
                 prev_of_removed->next = block_to_remove->next;
             }
+            else {
+                // curr == m_first
+                assert(m_first == curr);
+                m_first = curr->next;
+            }
 
             // update the block_to_remove->next->prev = block_to_remove->prev
             if (block_to_remove->next != nullptr){
                 block_to_remove->next->prev = prev_of_removed;
             }
+            break;
         }
 
         // continue to the next block
@@ -658,12 +664,12 @@ size_t _num_allocated_bytes(){
 
     // like free_byte without the condition of is_free == true
 
-    size_t total_space = 0;
+    //size_t total_space = 0;
 
     // add the big allocated:
-    total_space += big_block_list.allocated_bytes();
+    //total_space += big_block_list.allocated_bytes();
 
-    std::cout << "big_block_list.allocated_bytes= " << total_space << std::endl;
+    //std::cout << "big_block_list.allocated_bytes= " << total_space << std::endl;
 
     // start total_space with the small allocated:
     //total_space+= counter_total_bytes_used;
@@ -671,11 +677,11 @@ size_t _num_allocated_bytes(){
     //std::cout << "counter_total_bytes_used+big_block_list.allocated_bytes= " << total_space << std::endl;
 
     // add the small free:
-    total_space += _num_free_bytes();
-    std::cout << "total_space= " << total_space << std::endl;
+    //total_space += _num_free_bytes();
+    //std::cout << "total_space= " << total_space << std::endl;
 
     // return total_space
-    return total_space;
+    return counter_total_bytes_used+big_block_list.allocated_bytes()+_num_free_bytes();
 }
 
 size_t _num_meta_data_bytes(){
