@@ -589,6 +589,7 @@ void* srealloc(void* oldp, size_t size){
     if (size == 0 || size > SIZE_LIMITATION){
         return nullptr;
     }
+        std::cout << "\n\n\nare we get here?\n" << std::endl;
 
     int wanted_order = findMatchOrder(size);
     // if big block:
@@ -605,7 +606,6 @@ void* srealloc(void* oldp, size_t size){
     }
     // if the block is big enough:
     if (old_block->order == wanted_order) {
-        std::cout << "\n\n\nare we get here?\n" << std::endl;
         std::memmove((void*)old_block, oldp, src_size);
         return (void*)(old_block+1);
     }
