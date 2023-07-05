@@ -24,6 +24,7 @@
 #define MAX_SIZE (SIZE_OF_ORDER(MAX_ORDER))
 #define INITIAL_BLOCK_NUM 32
 #define SIZE_LIMITATION 100000000
+#define PAGE_SIZE 4096
 
 
 int counter_total_blocks_used = 0;
@@ -420,7 +421,9 @@ MallocMetadata* findTheMatchBlock(int wanted_order) {
 ----------------------------------------*/
 
 MallocMetadata* allocate_big_block(size_t wanted_size){
-    void* result = mmap(NULL, wanted_size+sizeof(MallocMetadata), PROT_READ | PROT_WRITE, MAP_ANONYMOUS, -1, 0);
+    size_t real_size = ((wanted_size+sizeof(MallocMetadata)-1)/PAGE_SIZE)+PAGE_SIZE;
+
+    void* result = mmap(NULL, real_size, PROT_READ | PROT_WRITE, MAP_ANONYMOUS, -1, 0);
     if (result == (void*)(-1)){
         perror("mmap fail: ");
         std::cout << "\n\n\n---------------------------------------------------------\nelchanan\n\n\n";
@@ -460,9 +463,9 @@ void* smalloc(size_t size){
     // big size:
     if (wanted_order == -1) {
         new_block = allocate_big_block(size);
-        if (new_block == (void*)(-1)){
+        /*if (new_block == (void*)(-1)){
             return nullptr;
-        }
+        }*/
         return (void*)(new_block+1);
     }
 
