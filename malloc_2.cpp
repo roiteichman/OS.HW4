@@ -7,7 +7,6 @@
 #include <iostream>
 
 
-//TODO: address structure for meta_data - theirs or like ATAM?
 struct MallocMetadata {
     size_t size;
     bool is_free;
@@ -16,9 +15,7 @@ struct MallocMetadata {
 };
 
 
-//TODO: global sorted LIST (by address) - our
-MallocMetadata* sorted_list = NULL;
-//TODO: global counter_total_blocks
+MallocMetadata* sorted_list = nullptr;
 int counter_total_blocks = 0;
 
 
@@ -26,7 +23,7 @@ void add_to_list(void* new_block){
     MallocMetadata* Malloc_new_block = (MallocMetadata*)new_block;
 
     // if first block - update the global list pointer + counter
-    if(sorted_list==NULL){
+    if(sorted_list==nullptr){
         sorted_list = Malloc_new_block;
         counter_total_blocks++;
         return;
@@ -37,17 +34,17 @@ void add_to_list(void* new_block){
     MallocMetadata* temp = head;
 
     // run the allocated blocks and find the right spot to enter the Malloc_new_block
-    while (temp!=NULL) {
+    while (temp!=nullptr) {
         // if need to be before temp
         if (Malloc_new_block < temp) {
             // save the temp_prev
             MallocMetadata *temp_prev = temp->prev;
 
             // update the prev to point on the Malloc_new_block
-            if (temp_prev != NULL){
+            if (temp_prev != nullptr){
                 temp_prev->next = Malloc_new_block;
             }
-            // if temp_prev == NULL - means temp was the first elem
+            // if temp_prev == nullptr - means temp was the first elem
             else {
                 sorted_list = Malloc_new_block;
             }
@@ -69,7 +66,7 @@ void add_to_list(void* new_block){
         }
 
             // if address of Malloc_new_block is the largest, enter at the end
-        else if (temp->next==NULL){
+        else if (temp->next==nullptr){
             temp->next = Malloc_new_block;
             Malloc_new_block->prev = temp;
             break;
@@ -90,7 +87,7 @@ void* find_free_block(size_t size){
     // move on the "free_list"
     MallocMetadata* temp = sorted_list;
     // search for fit block
-    while (temp != NULL){
+    while (temp != nullptr){
         if (temp->is_free == true && temp->size>=size){
             // if found - allocate it
             temp->is_free=false;
@@ -104,18 +101,18 @@ void* find_free_block(size_t size){
             temp = temp->next;
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 
 void* smalloc(size_t size){
     // check size
     if (size == 0 || size > MAXSIZE){
-        return NULL;
+        return nullptr;
     }
 
     void* new_block = find_free_block(size);
-    if (new_block!=NULL){
+    if (new_block!=nullptr){
         return new_block;
     }
 
@@ -130,8 +127,8 @@ void* smalloc(size_t size){
         MallocMetadata metadata;
         metadata.size=size;
         metadata.is_free=false;
-        metadata.prev=NULL;
-        metadata.next=NULL;
+        metadata.prev=nullptr;
+        metadata.next=nullptr;
 
         // put the metadata struct in the place we allocate - convert the address from void* to metadata* and saved in new_block the metadata
         *(MallocMetadata*)new_block = metadata;
@@ -140,12 +137,11 @@ void* smalloc(size_t size){
         add_to_list(new_block);
 
         // return pointer to start of block
-        // TODO: 1 is correct?
         return ((void*)((MallocMetadata*)new_block + 1));
     }
 
     // else (sbrk fail)
-    return NULL;
+    return nullptr;
 }
 
 
@@ -154,18 +150,18 @@ void* scalloc(size_t num, size_t size){
 
     // call smalloc
     void* new_block = smalloc(num * size);
-    if (new_block == NULL){
-        return NULL;
+    if (new_block == nullptr){
+        return nullptr;
     }
-    // if not NULL memset 0
+    // if not nullptr memset 0
     std::memset(new_block, 0, num * size);
 
     return new_block;
 }
 
 void sfree(void* p){
-    // check if p is null or meta_data flag is free (p-size(meta_data))
-    if (p == NULL){
+    // check if p is nullptr or meta_data flag is free (p-size(meta_data))
+    if (p == nullptr){
         return;
     }
     // else - free means get the right address and update flag
@@ -176,17 +172,17 @@ void sfree(void* p){
 void* srealloc(void* oldp, size_t size){
     // check size and pointer
     if (size == 0 || size > MAXSIZE){
-        return NULL;
+        return nullptr;
     }
     void* result;
 
-    // if oldp == NULL allocate size bytes and return
-    if (oldp == NULL){
+    // if oldp == nullptr allocate size bytes and return
+    if (oldp == nullptr){
         result = smalloc(size);
-        if (result!=NULL){
+        if (result!=nullptr){
             return result;
         }
-        return NULL;
+        return nullptr;
     }
 
     // if size < oldp.size() return oldp
@@ -198,9 +194,9 @@ void* srealloc(void* oldp, size_t size){
     else{
         // result = smalloc()
         result = smalloc(size);
-        // if allocation fail - return NULL and dont sfree the oldp
-        if  (result == NULL){
-            return NULL;
+        // if allocation fail - return nullptr and dont sfree the oldp
+        if  (result == nullptr){
+            return nullptr;
         }
         // else - allocation succeeded
         else {
@@ -220,7 +216,7 @@ size_t _num_free_blocks(){
     // move on the list
     MallocMetadata* curr = sorted_list;
     // for every block isfree==true make counter++
-    while (curr != NULL){
+    while (curr != nullptr){
         if (curr->is_free==true){
             counter++;
         }
@@ -238,7 +234,7 @@ size_t _num_free_bytes(){
     // move on the list
     MallocMetadata* curr = sorted_list;
     // for every block isfree==true make += total_free_space
-    while (curr != NULL){
+    while (curr != nullptr){
         if (curr->is_free==true){
             total_free_space += curr->size;
         }
@@ -261,7 +257,7 @@ size_t _num_allocated_bytes(){
     // move on the list
     MallocMetadata* curr = sorted_list;
     // for every block isfree==true make += total_space
-    while (curr != NULL){
+    while (curr != nullptr){
         total_space += curr->size;
         curr = curr->next;
     }
@@ -278,46 +274,3 @@ size_t _size_meta_data(){
     //return sizeof(meta_data)
     return sizeof(MallocMetadata);
 }
-
-/*
-int main(){
-
-    void* a = smalloc(32);
-    printf("a: %p\n", a);
-    printf("*(int*)a = %d\n", *(int*)a);
-    printf("a.size : %lu\n", ((MallocMetadata*)a-1)->size);
-    *(int*)a = 1;
-    printf("after change *(int*)a = %d\n", *(int*)a);
-
-    void* b = srealloc(a,16);
-    printf("b: %p\n", b);
-    printf("b.size : %lu\n", ((MallocMetadata*)b-1)->size);
-    printf("*(int*)b = %d\n", *(int*)b);
-
-
-    void* c = srealloc(b,64);
-    printf("c: %p\n", c);
-    printf("c.size : %lu\n", ((MallocMetadata*)c-1)->size);
-    printf("*(int*)c = %d\n", *(int*)c);
-
-
-
-    sfree(a);
-
-    printf("\nafter delete a:\n");
-    printf("num_of_blocks = %lu\n", (unsigned long)_num_allocated_blocks());
-    printf("num_of_bytes = %lu\n", (unsigned long)_num_allocated_bytes());
-    printf("num_meta_data_bytes = %lu\n", (unsigned long)_num_meta_data_bytes());
-    printf("size_meta_data = %lu\n", (unsigned long)_size_meta_data());
-
-
-
-
-    //void* b = smalloc(100000001);
-    //void* c = smalloc(100000000);
-    //void* d = smalloc(99999999);
-    //printf("b: %p\n", b);
-    //printf("c: %p\n", c);
-    //printf("d: %p\n", d);
-    return 0;
-}*/

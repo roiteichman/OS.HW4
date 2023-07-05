@@ -45,8 +45,6 @@ struct MallocMetadata {
 };
 
 
-//TODO: check metadata in every access
-
 MallocMetadata::MallocMetadata(int init_order, bool init_is_free, MallocMetadata* init_next, MallocMetadata* init_prev) :
         magic_num(global_magic),
         order(init_order),
@@ -206,7 +204,6 @@ BlockList block_lists[MAX_ORDER+1];
 /*-----------------------------------
  *  LINK LIST for the big_allocations
  ------------------------------------*/
-// TODO: another linklist for big_allocations
 
 class List{
 private:
@@ -554,8 +551,6 @@ void sfree(void* p){
         free_big_block(to_free);
     }
 }
-
-//TODO: implement from here
 
 void* big_block_realloc(MallocMetadata* old_block, size_t size){
     void* new_block = nullptr;
