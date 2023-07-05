@@ -104,6 +104,8 @@ void BlockList::addToList(MallocMetadata* new_metadata) {
     assert(new_metadata->order == m_order);
     assert(new_metadata->is_free);
 
+    safety(m_first);
+
     // if the match location is the start of the list:
     if (m_first == nullptr || m_first > new_metadata) {
         if (m_first != nullptr) {
@@ -127,6 +129,7 @@ void BlockList::addToList(MallocMetadata* new_metadata) {
     // run the allocated blocks and find the right spot to enter the Malloc_new_block
     while (temp->next != nullptr && new_metadata > temp->next) {
         temp = temp->next;
+        safety(temp);
     }
 
     new_metadata->next = temp->next;
@@ -134,6 +137,7 @@ void BlockList::addToList(MallocMetadata* new_metadata) {
 
     temp->next = new_metadata;
     if (new_metadata->next != nullptr) {
+        safety(new_metadata->next);
         new_metadata->next->prev = new_metadata;
     }
 
@@ -150,7 +154,10 @@ MallocMetadata* BlockList::popFirst() {
     assert(m_blocks_num > 0);
 
     MallocMetadata* result = m_first;
+    safety(result);
     m_first = m_first->next;
+    safety(m_first);
+
     if (m_first != nullptr) {
         assert(m_blocks_num > 1);
         m_first->prev = nullptr;
@@ -169,6 +176,7 @@ void BlockList::remove_block(MallocMetadata *block_to_remove) {
     assert(block_to_remove->is_free);
 
     if (block_to_remove->next != nullptr) {
+        safety(block_to_remove->next);
         block_to_remove->next->prev = block_to_remove->prev;
     }
 
@@ -177,6 +185,7 @@ void BlockList::remove_block(MallocMetadata *block_to_remove) {
         m_first = block_to_remove->next;
     }
     else {
+        safety(block_to_remove->prev);
         assert(m_first != block_to_remove);
         block_to_remove->prev->next = block_to_remove->next;
     }
@@ -216,12 +225,14 @@ List::List(): m_list_size(0), m_first(nullptr) {}
 
 void List::addToList(MallocMetadata* new_block) {
     MallocMetadata* prev_head = m_first;
+    safety(prev_head);
     // add the new big block in the head of the list
     m_first = new_block;
     // update the next block of it to be the prev head of the list
     new_block->next = prev_head;
     // if the list wasnt empty before, update the prev of the last head to be the new head
     if (prev_head!= nullptr){
+        assert(prev_head->prev == nullptr);
         prev_head->prev = new_block;
     }
     m_list_size++;
@@ -231,6 +242,7 @@ void List::remove_block(MallocMetadata *block_to_remove) {
     MallocMetadata* curr = m_first;
     MallocMetadata* prev_of_removed = nullptr;
     while (curr != nullptr){
+        safety(curr);
         // found
         if (curr == block_to_remove){
             prev_of_removed = block_to_remove->prev;
@@ -247,6 +259,7 @@ void List::remove_block(MallocMetadata *block_to_remove) {
 
             // update the block_to_remove->next->prev = block_to_remove->prev
             if (block_to_remove->next != nullptr){
+                safety(block_to_remove->next);
                 block_to_remove->next->prev = prev_of_removed;
             }
             break;
@@ -265,6 +278,7 @@ int List::get_len() const {
 size_t List::allocated_bytes() const {
     size_t result = 0;
     for (MallocMetadata* ptr = m_first; ptr != nullptr; ptr = ptr->next) {
+        safety(ptr);
         result += ptr->order;
     }
     return result;
@@ -444,13 +458,11 @@ MallocMetadata* allocate_big_block(size_t wanted_size){
 
 int free_big_block(MallocMetadata* block_to_delete){
     big_block_list.remove_block(block_to_delete);
-    std::cout << "\n\n\n---------------------------------------------------------\nroi\n\n\n";
     int result = munmap((void*)block_to_delete, (size_t)((block_to_delete->order)+sizeof(MallocMetadata)));
     if (result == -1){
         big_block_list.addToList(block_to_delete);
         perror("munmap fail: ");
     }
-    std::cout << "\n\n\n---------------------------------------------------------\nroi2\n\n\n";
     return result;
 }
 
