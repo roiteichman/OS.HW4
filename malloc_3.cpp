@@ -421,9 +421,9 @@ MallocMetadata* findTheMatchBlock(int wanted_order) {
 
 MallocMetadata* allocate_big_block(size_t wanted_size){
     void* result = mmap(NULL, wanted_size+sizeof(MallocMetadata), PROT_READ | PROT_WRITE, MAP_ANONYMOUS, -1, 0);
-    //std::cout << "\n\n\n---------------------------------------------------------\nelchanan\n\n\n";
     if (result == (void*)(-1)){
         perror("mmap fail: ");
+        std::cout << "\n\n\n---------------------------------------------------------\nelchanan\n\n\n";
     }
     else {
         std::cout << "\n\n\n---------------------------------------------------------\nroi\n\n\n";
