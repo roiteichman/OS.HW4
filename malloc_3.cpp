@@ -447,8 +447,6 @@ int free_big_block(MallocMetadata* block_to_delete){
 ----------------------------------------*/
 
 void* smalloc(size_t size){
-// entered to list
-    std::cout << "\n\n\n---------------------------------------------------------\nroi\n\n\n";
     init();
     // check size
     if (size == 0 || size > SIZE_LIMITATION){
@@ -458,6 +456,8 @@ void* smalloc(size_t size){
     MallocMetadata* new_block = nullptr;
     // big size:
     if (wanted_order == -1) {
+        // entered to list
+        std::cout << "\n\n\n---------------------------------------------------------\nroi\n\n\n";
         new_block = allocate_big_block(size);
         return (void*)(new_block+1);
     }
