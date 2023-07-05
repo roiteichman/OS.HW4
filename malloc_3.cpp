@@ -663,12 +663,12 @@ size_t _num_allocated_bytes(){
     // start total_space with the small allocated:
     total_space+= counter_total_bytes_used;
 
-    std::cout << "total_space= " << total_space << std::endl;
+    std::cout << "counter_total_bytes_used= " << total_space << std::endl;
 
     // add the big allocated:
     total_space += big_block_list.allocated_bytes();
 
-    std::cout << "total_space= " << total_space << std::endl;
+    std::cout << "counter_total_bytes_used+big_block_list.allocated_bytes= " << total_space << std::endl;
 
     // add the small free:
     total_space += _num_free_bytes();
