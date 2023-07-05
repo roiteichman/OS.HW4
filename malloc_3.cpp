@@ -605,6 +605,7 @@ void* srealloc(void* oldp, size_t size){
     // if the block is big enough:
     if (old_block->order == wanted_order) {
         std::memmove((void*)old_block, oldp, src_size);
+        std::cout << "\n\n\nare we get here?\n" << std::endl;
         return (void*)(old_block+1);
     }
     // alloc another block:
