@@ -438,11 +438,13 @@ MallocMetadata* allocate_big_block(size_t wanted_size){
 
 int free_big_block(MallocMetadata* block_to_delete){
     big_block_list.remove_block(block_to_delete);
+    std::cout << "\n\n\n---------------------------------------------------------\nroi\n\n\n";
     int result = munmap((void*)block_to_delete, (size_t)((block_to_delete->order)+sizeof(MallocMetadata)));
     if (result == -1){
         big_block_list.addToList(block_to_delete);
         perror("munmap fail: ");
     }
+    std::cout << "\n\n\n---------------------------------------------------------\nroi2\n\n\n";
     return result;
 }
 
@@ -531,7 +533,6 @@ void sfree(void* p){
     }
     // big block:
     else {
-        std::cout << "\n\n\n---------------------------------------------------------\nroi\n\n\n";
         int result = free_big_block(to_free);
         if (result == -1) {
             std::cout << "\n\n\n---------------------------------------------------------\nfail\n\n\n";
