@@ -421,9 +421,9 @@ MallocMetadata* findTheMatchBlock(int wanted_order) {
 ----------------------------------------*/
 
 MallocMetadata* allocate_big_block(size_t wanted_size){
-    size_t real_size = ((wanted_size+sizeof(MallocMetadata)-1)/PAGE_SIZE)+PAGE_SIZE;
+    //size_t real_size = ((wanted_size+sizeof(MallocMetadata)-1)/PAGE_SIZE)+PAGE_SIZE;
 
-    void* result = mmap(NULL, real_size, PROT_READ | PROT_WRITE, MAP_ANONYMOUS, -1, 0);
+    void* result = mmap(nullptr, wanted_size+sizeof(MallocMetadata), PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
     if (result == (void*)(-1)){
         perror("mmap fail: ");
         std::cout << "\n\n\n---------------------------------------------------------\nelchanan\n\n\n";
@@ -706,6 +706,12 @@ void print_all_lists() {
     }
 }
 
+
+
+
+int main(){
+    return 0;
+}
 #endif
 
 #endif
