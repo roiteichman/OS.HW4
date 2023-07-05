@@ -59,6 +59,7 @@ MallocMetadata::MallocMetadata(int init_order, bool init_is_free, MallocMetadata
 ----------------------------------------*/
 
 void safety(MallocMetadata* block){
+    if (block == nullptr) return;
     if (block->magic_num != global_magic) {
         exit(0xdeadbeef);
     }
