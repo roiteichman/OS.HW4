@@ -424,6 +424,8 @@ MallocMetadata* allocate_big_block(size_t wanted_size){
     if (result != MAP_FAILED){
         MallocMetadata tmp(wanted_size);
         *(MallocMetadata*)result = tmp;
+        // entered to list
+        std::cout << "\n\n\n---------------------------------------------------------\nroi\n\n\n";
         big_block_list.addToList((MallocMetadata*)result);
     }
     else {
@@ -456,8 +458,6 @@ void* smalloc(size_t size){
     MallocMetadata* new_block = nullptr;
     // big size:
     if (wanted_order == -1) {
-        // entered to list
-        std::cout << "\n\n\n---------------------------------------------------------\nroi\n\n\n";
         new_block = allocate_big_block(size);
         return (void*)(new_block+1);
     }
