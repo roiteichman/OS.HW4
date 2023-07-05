@@ -663,7 +663,7 @@ size_t _num_allocated_bytes(){
     // start total_space with the small allocated:
     total_space+= counter_total_bytes_used;
     // add the big allocated:
-    //total_space += big_block_list.allocated_bytes();
+    total_space += big_block_list.allocated_bytes();
     // add the small free:
     total_space += _num_free_bytes();
     // return total_space
