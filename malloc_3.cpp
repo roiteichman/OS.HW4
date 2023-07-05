@@ -707,11 +707,6 @@ void print_all_lists() {
 }
 
 
-
-
-int main(){
-    return 0;
-}
 #endif
 
 #endif
