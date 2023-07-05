@@ -376,9 +376,9 @@ bool merge (MallocMetadata** curr_block) {
 MallocMetadata* mergeToList (MallocMetadata* curr_block) {
     assert(curr_block->is_free);
     assert((unsigned long long)curr_block % SIZE_OF_ORDER(curr_block->order) == 0);
-    if (curr_block->order == MAX_ORDER) {
-        return nullptr;
-    }
+//    if (curr_block->order == MAX_ORDER) {
+//        return nullptr;
+//    }
 
     while(curr_block->order < MAX_ORDER) {
         if (merge(&curr_block) == false) break;
