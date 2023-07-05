@@ -422,15 +422,15 @@ MallocMetadata* findTheMatchBlock(int wanted_order) {
 MallocMetadata* allocate_big_block(size_t wanted_size){
     void* result = mmap(NULL, wanted_size+sizeof(MallocMetadata), PROT_READ | PROT_WRITE, MAP_ANONYMOUS, -1, 0);
     //std::cout << "\n\n\n---------------------------------------------------------\nelchanan\n\n\n";
-    if (result != MAP_FAILED){
+    if (result == (void*)(-1)){
+        perror("mmap fail: ");
+    }
+    else {
         std::cout << "\n\n\n---------------------------------------------------------\nroi\n\n\n";
         MallocMetadata tmp(wanted_size);
         *(MallocMetadata*)result = tmp;
         // entered to list
         big_block_list.addToList((MallocMetadata*)result);
-    }
-    else {
-        perror("mmap fail: ");
     }
     return (MallocMetadata*)result;
 }
@@ -460,6 +460,9 @@ void* smalloc(size_t size){
     // big size:
     if (wanted_order == -1) {
         new_block = allocate_big_block(size);
+        if (new_block == (void*)(-1)){
+            return nullptr;
+        }
         return (void*)(new_block+1);
     }
 
