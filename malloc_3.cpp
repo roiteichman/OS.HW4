@@ -11,12 +11,12 @@
 #include <cstring>
 #include <unistd.h>
 #include <iostream>
+#define NDEBUG
 #include <assert.h>
 #include <sys/mman.h>
 #include <cstdlib>
 
 //#define DEBUG_PRINT
-#define NDEBUG
 
 #define SIZE_OF_ORDER(x) ((size_t)(MIN_SIZE<<(x)))
 
