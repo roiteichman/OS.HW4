@@ -309,8 +309,7 @@ void init() {
 
     unsigned long long curr_program_break = (unsigned long long)sbrk(0);
     sbrk(MAX_SIZE - (curr_program_break % MAX_SIZE));
-//    void* t = sbrk(0);
-//    printf("%x\n", (unsigned long)t);
+
     void* start_ptr = sbrk(MAX_SIZE * INITIAL_BLOCK_NUM);
     void* block_ptr = start_ptr;
 
@@ -428,7 +427,7 @@ MallocMetadata* findTheMatchBlock(int wanted_order) {
     }
     // if matching block not found:
     if (match_block == nullptr) {
-        std::cout << "error: the memory is full!" << std::endl;
+        //std::cout << "error: the memory is full!" << std::endl;
         return nullptr;
     }
     // set the block to the correct size:
@@ -552,10 +551,7 @@ void sfree(void* p){
     }
     // big block:
     else {
-        int result = free_big_block(to_free);
-        if (result == -1) {
-            std::cout << "\n\n\n---------------------------------------------------------\nfail\n\n\n";
-        }
+        free_big_block(to_free);
     }
 }
 
