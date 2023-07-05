@@ -586,7 +586,7 @@ void* srealloc(void* oldp, size_t size){
 
 
     safety(old_block);
-    std::cout << "\n\n\nare we get here?\n" << std::endl;
+
     // check size and pointer
     if (size == 0 || size > SIZE_LIMITATION){
         return nullptr;
@@ -600,14 +600,12 @@ void* srealloc(void* oldp, size_t size){
     // else regular block
     size_t src_size = SIZE_OF_ORDER(old_block->order)-sizeof(MallocMetadata);
     // try to merge until the wanted size:
-
-    std::cout << "\n\n\nold_block->order = " << old_block->order <<  "wanted_order = " << wanted_order << "\n" << std::endl;
     while (old_block->order < wanted_order) {
         if (merge(&old_block) == false) break;
     }
     // if the block is big enough:
     if (old_block->order == wanted_order) {
-        std::memmove((void*)old_block, oldp, src_size);
+        std::memmove((void*)(old_block+1), oldp, src_size);
         return (void*)(old_block+1);
     }
     // alloc another block:
