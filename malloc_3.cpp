@@ -661,7 +661,7 @@ size_t _num_allocated_bytes(){
     size_t total_space = 0;
 
     // add the big allocated:
-    total_space += big_block_list.allocated_bytes();
+    //total_space += big_block_list.allocated_bytes();
 
     std::cout << "big_block_list.allocated_bytes= " << total_space << std::endl;
 
