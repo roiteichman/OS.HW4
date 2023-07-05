@@ -584,12 +584,13 @@ void* srealloc(void* oldp, size_t size){
 
     MallocMetadata* old_block = (MallocMetadata*)oldp-1;
 
+    std::cout << "\n\n\nare we get here?\n" << std::endl;
+
     safety(old_block);
     // check size and pointer
     if (size == 0 || size > SIZE_LIMITATION){
         return nullptr;
     }
-        std::cout << "\n\n\nare we get here?\n" << std::endl;
 
     int wanted_order = findMatchOrder(size);
     // if big block:
