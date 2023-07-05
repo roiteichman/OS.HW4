@@ -295,7 +295,6 @@ List big_block_list;
 
 // if we call init many times, it's OK
 void init() {
-    assert(0);
     // check if the system is already initialized:
     if (system_initialized) return;
     system_initialized = true;
