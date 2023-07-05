@@ -606,7 +606,7 @@ void* srealloc(void* oldp, size_t size){
         if (merge(&old_block) == false) break;
     }
     // if the block is big enough:
-    if (old_block->order == wanted_order) {
+    if (old_block->order >= wanted_order) {
         // update counter of bytes in used
         counter_total_bytes_used += (SIZE_OF_ORDER(old_block->order)-old_bytes_used);
         std::memmove((void*)(old_block+1), oldp, src_size);
