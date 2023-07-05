@@ -16,6 +16,7 @@
 #include <cstdlib>
 
 //#define DEBUG_PRINT
+#define NDEBUG
 
 #define SIZE_OF_ORDER(x) ((size_t)(MIN_SIZE<<(x)))
 
