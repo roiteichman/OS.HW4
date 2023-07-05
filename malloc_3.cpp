@@ -420,11 +420,10 @@ MallocMetadata* findTheMatchBlock(int wanted_order) {
 ----------------------------------------*/
 
 MallocMetadata* allocate_big_block(size_t wanted_size){
-    std::cout << "\n\n\n---------------------------------------------------------\nroi\n\n\n";
     void* result = mmap(NULL, wanted_size+sizeof(MallocMetadata), PROT_READ | PROT_WRITE, MAP_ANONYMOUS, -1, 0);
-    std::cout << "\n\n\n---------------------------------------------------------\nelchanan\n\n\n";
-
+    //std::cout << "\n\n\n---------------------------------------------------------\nelchanan\n\n\n";
     if (result != MAP_FAILED){
+        std::cout << "\n\n\n---------------------------------------------------------\nroi\n\n\n";
         MallocMetadata tmp(wanted_size);
         *(MallocMetadata*)result = tmp;
         // entered to list
