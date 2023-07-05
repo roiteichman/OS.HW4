@@ -15,7 +15,7 @@
 #include <sys/mman.h>
 #include <cstdlib>
 
-#define DEBUG_PRINT
+//#define DEBUG_PRINT
 
 #define SIZE_OF_ORDER(x) ((size_t)(MIN_SIZE<<(x)))
 
@@ -294,6 +294,7 @@ List big_block_list;
 
 // if we call init many times, it's OK
 void init() {
+    assert(0);
     // check if the system is already initialized:
     if (system_initialized) return;
     system_initialized = true;
@@ -629,9 +630,9 @@ void* srealloc(void* oldp, size_t size){
 
 
 size_t _num_free_blocks(){
-    /*if(!system_initialized){
+    if(!system_initialized){
         return 0;
-    }*/
+    }
     // sum len of block_list for every entry
 
     // init counter
@@ -649,9 +650,9 @@ size_t _num_free_blocks(){
 }
 
 size_t _num_free_bytes(){
-    /*if(!system_initialized){
+    if(!system_initialized){
         return 0;
-    }*/
+    }
     // like free_block but instead of return the len*(sizeof(order)-metadata)
 
     // init total_free_space
@@ -667,13 +668,16 @@ size_t _num_free_bytes(){
 }
 
 size_t _num_allocated_blocks(){
-    /*if(!system_initialized){
+    if(!system_initialized){
         return 0;
-    }*/
+    }
     return counter_total_blocks_used+ _num_free_blocks() +big_block_list.get_len();
     }
 
 size_t _num_allocated_bytes(){
+    if(!system_initialized){
+        return 0;
+    }
     return counter_total_bytes_used+big_block_list.allocated_bytes()+_num_free_bytes();
 }
 
