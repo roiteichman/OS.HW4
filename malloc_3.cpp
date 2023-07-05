@@ -526,7 +526,6 @@ void sfree(void* p){
         return;
     }
 
-
     to_free->is_free= true;
 
     // regular block:
